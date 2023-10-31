@@ -1,6 +1,13 @@
 extends Node2D;
 
-@export var attribute:BlockAttribute = null;
+@export var attribute:ApplicationBlockAttribute = ApplicationBlockAttribute.new();
+
+func _init() :
+	pass;
+
+func get_texture() :
+	var tex = attribute.textures.get_frame_texture("Default", 0);
+	return tex;
 
 func put() :
 	pass; # [提供重写]放置方法

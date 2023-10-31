@@ -1,7 +1,7 @@
 extends Resource;
 class_name LootTable;
 
-var pools:Array[LootTableEntries] = [];
+var pools:Array[LootTableEntries] = []; # 物品条目列表
 
 func get_total_weight():
 	var result:float = 0.0;

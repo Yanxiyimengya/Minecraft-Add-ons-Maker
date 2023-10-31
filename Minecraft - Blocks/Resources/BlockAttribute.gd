@@ -1,5 +1,6 @@
 extends Resource;
 class_name BlockAttribute;
+# 方块属性信息
 
 enum BLOCK_TYPE {
 	GASEOUS, # 气态的 方块可以移动到它的位置,并替换它
@@ -8,7 +9,11 @@ enum BLOCK_TYPE {
 	ADDITIONAL # 当下方没有固体方块时,它会被摧毁
 }
 
-@export var name:String = "NULL";
-@export var types:Array[BLOCK_TYPE] = [];
+@export var id:String = "NULL"; # 方块唯一ID
+@export var types:BLOCK_TYPE = BLOCK_TYPE.SOLID; # 方块类型
+@export var textures:SpriteFrames = null; # 应用的纹理信息
+@export var loot_table:LootTable = null; # 应用的战利品表
 
+var point:int = 1; # 被正常消除后给予的分值
+var particles:bool = true; # 决定方块被销毁后是否基于texture播放粒子动画
 

@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://bj3xra7vl861v"]
+
+[ext_resource type="Script" path="res://Prefabs/Block.gd" id="1_oulv0"]
+[ext_resource type="Script" path="res://Resources/BlockAttribute.gd" id="2_xmth4"]
+
+[sub_resource type="Resource" id="Resource_wb5bo"]
+script = ExtResource("2_xmth4")
+id = "NULL"
+types = 2
+
+[node name="Block" type="Node2D"]
+script = ExtResource("1_oulv0")
+attribute = SubResource("Resource_wb5bo")

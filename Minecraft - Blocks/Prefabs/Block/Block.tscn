@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://Prefabs/Block/Block.gd" id="1_oyjtg"]
 [ext_resource type="Shader" path="res://Prefabs/Block/BlockShader.gdshader" id="2_jr06w"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_e3ffa"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fga3d"]
 shader = ExtResource("2_jr06w")
 shader_parameter/lerp = 0.0
 
@@ -11,4 +11,7 @@ shader_parameter/lerp = 0.0
 script = ExtResource("1_oyjtg")
 
 [node name="BlockSprite" type="Sprite2D" parent="."]
-material = SubResource("ShaderMaterial_e3ffa")
+material = SubResource("ShaderMaterial_fga3d")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(6, 91)

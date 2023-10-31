@@ -17,3 +17,8 @@ enum BLOCK_TYPE {
 var point:int = 1; # 被正常消除后给予的分值
 var particles:bool = true; # 决定方块被销毁后是否基于texture播放粒子动画
 
+func get_textures():
+	if textures is SpriteFrames:
+		return textures;
+	return load("res://Sprites/Blocks/lose.png");
+	pass; # 获取方块纹理

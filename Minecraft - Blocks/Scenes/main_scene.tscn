@@ -1,30 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://qmnu3jcm0s7p"]
+[gd_scene load_steps=2 format=3 uid="uid://qmnu3jcm0s7p"]
 
-[ext_resource type="Texture2D" uid="uid://ypgm6myirwr2" path="res://Sprites/Blocks/dirt.png" id="1_ppoip"]
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_5fjcr"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("1_ppoip")
-}, {
-"duration": 1.0,
-"texture": ExtResource("1_ppoip")
-}],
-"loop": true,
-"name": &"default",
-"speed": 10.0
-}]
+[ext_resource type="Script" path="res://Scenes/main_scene.gd" id="1_sb1w8"]
 
 [node name="MainScene" type="Control"]
 layout_mode = 3
 anchors_preset = 0
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Sprite2D"]
-position = Vector2(281, 170)
-scale = Vector2(36.125, 22.25)
-sprite_frames = SubResource("SpriteFrames_5fjcr")
-
-[node name="CPUParticles2D" type="CPUParticles2D" parent="."]
+script = ExtResource("1_sb1w8")

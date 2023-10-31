@@ -11,7 +11,7 @@ enum BLOCK_TYPE {
 
 @export var id:String = "NULL"; # 方块唯一ID
 @export var types:BLOCK_TYPE = BLOCK_TYPE.SOLID; # 方块类型
-@export var textures:BlockTextures = BlockTextures.new(); # 应用的纹理信息
+@export var sprite_texturts:BlockTextures = BlockTextures.new(); # 应用的纹理信息
 @export var loot_table:LootTable = null; # 应用的战利品表
 
 var point:int = 1; # 被正常消除后给予的分值

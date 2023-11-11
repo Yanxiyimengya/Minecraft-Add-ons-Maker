@@ -1,24 +1,29 @@
 [gd_scene load_steps=13 format=3 uid="uid://qmnu3jcm0s7p"]
 
-[ext_resource type="Script" path="res://Scenes/main_scene.gd" id="1_sb1w8"]
 [ext_resource type="PackedScene" uid="uid://bj3xra7vl861v" path="res://Prefabs/Block/Block.tscn" id="2_81l4x"]
 [ext_resource type="Script" path="res://Resources/BlockAttribute.gd" id="2_qxvnd"]
 [ext_resource type="Script" path="res://Resources/BlockTextures.gd" id="4_ii8yf"]
 [ext_resource type="Texture2D" uid="uid://7wd6emblebgq" path="res://Sprites/Blocks/command_block_back.png" id="5_scrtg"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ba6ua"]
+[sub_resource type="GDScript" id="GDScript_5gpq4"]
+script/source = "extends Control;
+
+
+"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_neu3o"]
 atlas = ExtResource("5_scrtg")
 region = Rect2(0, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_jmly1"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_da3k0"]
 atlas = ExtResource("5_scrtg")
 region = Rect2(0, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_vmhsd"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_2v6ey"]
 atlas = ExtResource("5_scrtg")
 region = Rect2(0, 32, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_xor7q"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_ieino"]
 atlas = ExtResource("5_scrtg")
 region = Rect2(0, 48, 16, 16)
 
@@ -26,20 +31,20 @@ region = Rect2(0, 48, 16, 16)
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_ba6ua")
+"texture": SubResource("AtlasTexture_neu3o")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_jmly1")
+"texture": SubResource("AtlasTexture_da3k0")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_vmhsd")
+"texture": SubResource("AtlasTexture_2v6ey")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_xor7q")
+"texture": SubResource("AtlasTexture_ieino")
 }],
 "loop": true,
 "name": &"default",
-"speed": 5.0
+"speed": 50.0
 }]
 
 [sub_resource type="Resource" id="Resource_gj536"]
@@ -48,7 +53,7 @@ textures = SubResource("SpriteFrames_f53c2")
 animation = {
 "frame_first": 0,
 "frames_sort": [],
-"frames_speed": 5,
+"frames_speed": 30,
 "interpolate": false,
 "texture_count": 4
 }
@@ -62,7 +67,7 @@ sprite_texturts = SubResource("Resource_gj536")
 [node name="MainScene" type="Control"]
 layout_mode = 3
 anchors_preset = 0
-script = ExtResource("1_sb1w8")
+script = SubResource("GDScript_5gpq4")
 
 [node name="Block" parent="." instance=ExtResource("2_81l4x")]
 position = Vector2(257, 154)

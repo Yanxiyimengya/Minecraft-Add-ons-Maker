@@ -1,21 +1,10 @@
 extends Resource;
 class_name BlockTextures;
 
-func _init(tex = null):
-	if (textures == null) :
-		textures = SpriteFrames.new();
-	if (!textures.has_animation("default")):
-		textures.add_animation("default");
-	if (textures.get_frame_count("default") == 0) :
-		textures.add_frame("default", load("res://Sprites/Blocks/lose.png"));
-	match (tex) :
-		SpriteFrames:
-			var frame_count:int = tex.get_frame_count("default");
-			if (frame_count > 0):
-				for count in frame_count:
-					textures.set_frame("default", count, tex.get_frame_texture("Default", count), tex.get_frame_duration("Default", count));
-	animation.texture_count = textures.get_frame_count("default");
-	pass; # 构造函数
+func _init():
+	self.changed.connect(func():
+		print(123);
+	);
 
 @export var textures:SpriteFrames = null:
 	set(_val):
@@ -28,7 +17,7 @@ var display_texture = null: # 用于显示的纹理
 	get:
 		return textures.get_frame_texture("default", 0);
 @export var animation = {
-	texture_count = 0,    # 帧纹理数量
+	texture_count = 0,   # 帧纹理数量
 	interpolate = false, # 若为 true 将会在帧与帧之间生成一张间隔时间大于1的帧
 	frame_first = 0,     # 指定开始播放的帧的位置
 	frames_speed = 5,    # 动画帧播放速率

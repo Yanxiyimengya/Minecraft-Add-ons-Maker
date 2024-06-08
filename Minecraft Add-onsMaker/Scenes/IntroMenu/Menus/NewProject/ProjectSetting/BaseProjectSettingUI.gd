@@ -1,7 +1,5 @@
 extends Node;
 
-var project_config : ProjectConfig = ProjectConfig.new();
-
 #region Tools
 func get_filepath_parent(f_path : String) -> String : 
 	var _len : int = f_path.get_file().length() + 1;
@@ -20,6 +18,6 @@ func get_default_project_path() -> String :
 	return currect_path;
 	# 获取路径上有效的默认项目路径
 
-func _create_project() -> ProjectConfig : 
-	return project_config;
+func _create_project() -> PackageConfig : 
+	return;
 	# 这是一个虚函数, 创建项目时会对其进行调用

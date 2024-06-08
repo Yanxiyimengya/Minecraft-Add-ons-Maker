@@ -40,6 +40,7 @@ func add_project_item(project_info : EditorConfig.ProjectInfoData) -> Node :
 				$PopupMenu.position = DisplayServer.mouse_get_position();
 			);
 	return proj_bar;
+
 func remove_project_item(item_node : Node) : 
 	project_item.erase(item_node);
 	Global.cache.remove_project_config(item_node.project_info);
@@ -74,7 +75,7 @@ func open_project(project_bar : Node) :
 		WindowManager.set_dialog_window_message(\"无法打开项目文件夹\\r项目可能被删除或移动\");
 		WindowManager.open_window(WindowManager.WindowID.Dialog);
 		return;
-	var proj : ProjectConfig = ProjectConfig.load_project(f_path);
+	var proj : PackageConfig = ProjectManager.load_project(f_path);
 	if (proj == null) : 
 		WindowManager.set_dialog_window_title(\"出了点问题\");
 		WindowManager.set_dialog_window_message(\"无法解析项目文件\\r或项目文件不存在\");
@@ -130,9 +131,20 @@ theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 15
 
-[node name="ProjectBarContainer" type="VBoxContainer" parent="VBoxContainer/VBoxContainer/ProgramBar"]
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/VBoxContainer/ProgramBar"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/VBoxContainer/ProgramBar/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 5
+
+[node name="ProjectBarContainer" type="VBoxContainer" parent="VBoxContainer/VBoxContainer/ProgramBar/ScrollContainer/MarginContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/separation = 5
 
 [node name="NoProjectLabel" type="Label" parent="VBoxContainer/VBoxContainer"]

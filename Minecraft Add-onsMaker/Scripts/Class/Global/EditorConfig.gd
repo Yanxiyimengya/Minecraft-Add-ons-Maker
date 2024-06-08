@@ -33,7 +33,7 @@ func load_config(file_path : String) :
 		
 		project_configs[project] = data;
 
-func add_project_config(project_config : ProjectConfig) : 
+func add_project_config(project_config : PackageConfig) : 
 	var proj_data : ProjectInfoData = ProjectInfoData.new();
 	project_configs[project_config.project_path] = proj_data;
 	
@@ -51,7 +51,6 @@ func save_project_config(file_path : String) :
 		config.set_value(project, "name", project_configs[project].get("project_name"));
 		config.set_value(project, "path", project_configs[project].get("project_path"));
 	config.save(file_path + "projects.csv");
-	
 
 class ProjectInfoData : 
 	extends RefCounted;

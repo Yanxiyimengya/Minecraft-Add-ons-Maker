@@ -21,7 +21,6 @@ func _ready() :
 	resource_tree.create_item().set_text(0, "资源管理器");
 	# 创建资源树树根
 	
-	load_files("C:/Users/guosh/Desktop/根");
 
 func load_file(file_path : String) -> Resource : 
 	if (!FileAccess.file_exists(file_path)) : 
@@ -70,7 +69,7 @@ func load_files(file_path : String, root : TreeItem = null) :
 	# 加载一个目录内的所有文件进入资源树
 
 func append_resource_to_tree(tree_item : TreeItem, res_name : String, res : Resource) -> TreeItem : 
-	var type : ITEM_TYPE = ITEM_TYPE.TEXTURE;
+	var type : ITEM_TYPE;
 	if (res is Texture) : 
 		type = ITEM_TYPE.TEXTURE;
 	else : 
@@ -118,3 +117,7 @@ func find_item_to_dir(path : String) -> TreeItem :
 			i += 1;
 	return tree_item;
 	# 找到一个路径下的TreeItem
+
+func get_data(item : TreeItem) : 
+	return item.get_metadata(COLUMN_NAME.DATA);
+

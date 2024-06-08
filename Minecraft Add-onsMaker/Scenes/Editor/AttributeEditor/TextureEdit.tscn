@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://dklcjpwc357gd"]
+
+[ext_resource type="PackedScene" uid="uid://bq0hcta3y5b17" path="res://Scenes/Editor/AttributeEditor/TextEdit/TextEdit.tscn" id="1_52cct"]
+
+[sub_resource type="GDScript" id="GDScript_d6gdq"]
+script/source = "extends VBoxContainer;
+@onready var texture_name_edit = $TextureNameEdit;
+
+var target = null;
+
+func _ready() : 
+	texture_name_edit.line_edit.text = target.name;
+	
+	texture_name_edit.line_edit.text_changed.connect(func(text : String) : 
+		target.name = text;
+	);
+	pass;
+"
+
+[node name="TextureEdit" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = SubResource("GDScript_d6gdq")
+
+[node name="TextureNameEdit" parent="." instance=ExtResource("1_52cct")]
+layout_mode = 2
+title = "图像名称"

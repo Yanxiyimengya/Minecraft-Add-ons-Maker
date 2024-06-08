@@ -1,8 +1,9 @@
-[gd_scene load_steps=12 format=3 uid="uid://704chco0nouh"]
+[gd_scene load_steps=13 format=3 uid="uid://704chco0nouh"]
 
 [ext_resource type="FontFile" uid="uid://cin6d10brxghd" path="res://Assets/Fonts/NotoSans-Bold-5.ttf" id="1_leuxv"]
 [ext_resource type="Theme" uid="uid://c3gb35qykvkhd" path="res://Assets/Theme/EditorGUI.tres" id="1_p57hj"]
 [ext_resource type="FontFile" uid="uid://drraurnpg8khi" path="res://Assets/Fonts/Unifont.otf" id="2_ualiq"]
+[ext_resource type="PackedScene" uid="uid://csh8dxyn1sa3g" path="res://Scenes/IntroMenu/Menus/NewProject/ProjectSetting/Resource.tscn" id="4_kkcty"]
 [ext_resource type="Texture2D" uid="uid://ctdf6tdlmfbaf" path="res://Assets/Images/GUI/ui_button.png" id="9_42rsb"]
 [ext_resource type="Texture2D" uid="uid://cimix7ngnx86v" path="res://Assets/Images/GUI/ui_button_hover.png" id="10_q043r"]
 
@@ -17,9 +18,11 @@ var currect_setting_ui : Node = null;
 
 func _ready() : 
 	change_project_setting_ui(
-		load(\"res://Scenes/IntroMenu/Menus/NewProject/ProjectSetting/AddonPage.tscn\").instantiate()
+		load(\"res://Scenes/IntroMenu/Menus/NewProject/ProjectSetting/Resource.tscn\").instantiate()
 	);
-	add_project_type(\"附加包\", preload(\"res://Assets/Images/Icons/bookshelf_block.png\"), \"addon\");
+	add_project_type(\"资源包\", preload(\"res://Assets/Images/Icons/grass_block.png\"));
+	add_project_type(\"行为包\", preload(\"res://Assets/Images/Icons/dirt_block.png\"));
+	add_project_type(\"附加包\", preload(\"res://Assets/Images/Icons/bookshelf_block.png\"));
 
 
 func change_project_setting_ui(ui : Node) : 
@@ -41,26 +44,25 @@ func add_project_type(text : String, icon : Texture = null, type : String = \"\"
 		t_button.texture = icon;
 	t_button.button.toggle_mode = true;
 	t_button.button.button_group = project_type_button_group;
-	t_button.button.set_meta(\"type\", type);
+	project_type_button_map[t_button.button] = type;
 	# 添加一个项目类型选项
 
 func _on_create_project_button_pressed() : 
 	if (currect_setting_ui == null || !currect_setting_ui.has_method(\"_create_project\")) : 
 		return;
-	var proj : PackageConfig = currect_setting_ui.call(\"_create_project\");
-	if (proj == null) : 
+	var mca_proj : PackageConfig = currect_setting_ui.call(\"_create_project\");
+	if (mca_proj == null) : 
 		return;
-	# 创建特定项目
+	# 调用_create_project函数检测项目配置是否正确
 	
 	var pressed_button : BaseButton = project_type_button_group.get_pressed_button();
 	if (pressed_button == null) : 
 		return;
-	match(pressed_button.get_meta(\"type\")) : 
-		_ :
-			pass;
+	# 检测并设置项目类型
 	
-	ProjectManager.open_project(proj);
-	# 检测项目类型 添加附加模块
+	ProjectManager.save_project(mca_proj, mca_proj.project_path);
+	Global.cache.add_project_config(mca_proj);
+	ProjectManager.open_project(mca_proj);
 	
 "
 
@@ -151,8 +153,6 @@ vertical_scroll_mode = 0
 
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/VBoxContainer2/ProjectType"]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
@@ -168,8 +168,10 @@ theme_override_constants/separation = 10
 [node name="ProjectSettingMenu" type="PanelContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bqw2t")
+
+[node name="Resource" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ProjectSettingMenu" instance=ExtResource("4_kkcty")]
+layout_mode = 2
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer"]
 layout_mode = 2

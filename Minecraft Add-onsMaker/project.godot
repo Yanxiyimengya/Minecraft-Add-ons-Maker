@@ -24,6 +24,7 @@ MainGUI="*res://Scenes/MainGUI.tscn"
 ProjectManager="*res://Scripts/Autoload/ProjectManager.gd"
 WindowManager="*res://Scenes/WindowManager.tscn"
 ResourceManager="*res://Scripts/Autoload/ResourceManager.gd"
+AssetManager="*res://Scripts/Autoload/AssetManager.gd"
 
 [display]
 

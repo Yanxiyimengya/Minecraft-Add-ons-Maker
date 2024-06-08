@@ -43,7 +43,8 @@ var project_info : EditorConfig.ProjectInfoData = null :
 		project_info = value;
 		title = value.project_name;
 		path = value.project_path;
-		%ProjectIcon.texture = value.project_icon;
+		if (value.project_icon != null) : 
+			%ProjectIcon.texture = value.project_icon;
 
 func _on_texture_button_pressed() : 
 	OS.shell_open(%FilePathLabel.text);

@@ -1,0 +1,406 @@
+[gd_scene load_steps=23 format=3 uid="uid://704chco0nouh"]
+
+[ext_resource type="FontFile" uid="uid://cin6d10brxghd" path="res://Assets/Fonts/NotoSans-Bold-5.ttf" id="1_v4wyq"]
+[ext_resource type="Texture2D" uid="uid://ctdf6tdlmfbaf" path="res://Assets/Images/GUI/ui_button.png" id="3_qno0c"]
+[ext_resource type="StyleBox" uid="uid://bimera0suldvh" path="res://Assets/Theme/Styles/MinecraftLineEdit.tres" id="3_t77f3"]
+[ext_resource type="FontFile" uid="uid://drraurnpg8khi" path="res://Assets/Fonts/Unifont.otf" id="4_hoi8f"]
+[ext_resource type="StyleBox" uid="uid://bv8vx8r8rwplb" path="res://Assets/Theme/Styles/MinecraftLineEditFocus.tres" id="4_up3n0"]
+[ext_resource type="Texture2D" uid="uid://hiqi5hrjwnc5" path="res://Assets/Images/GUI/button_black.png" id="5_nfboc"]
+[ext_resource type="Texture2D" uid="uid://cimix7ngnx86v" path="res://Assets/Images/GUI/ui_button_hover.png" id="6_i81f0"]
+[ext_resource type="Texture2D" uid="uid://cripmd1fwkdqi" path="res://Assets/Images/GUI/button_pressed_black.png" id="6_xii8a"]
+[ext_resource type="PackedScene" uid="uid://cs0i4kt4ajatc" path="res://Scripts/Tools/LineEditExt.tscn" id="7_mtvb6"]
+[ext_resource type="Texture2D" uid="uid://doy16rt3m3776" path="res://Assets/Images/GUI/line_edit.png" id="8_kwie8"]
+
+[sub_resource type="GDScript" id="GDScript_50tnv"]
+script/source = "extends MarginContainer;
+
+@onready var project_name_edit = %ProjectNameEdit;
+@onready var project_path_edit = %ProjectPathEdit;
+
+func _ready() : 
+	project_name_edit.text = get_default_project_name();
+	update_project_path(project_name_edit.text);
+	
+	%ProjectPathButton.pressed.connect(func() :
+		DisplayServer.file_dialog_show(\"选择文件夹\", project_path_edit.text , \\
+				\"\", false, DisplayServer.FILE_DIALOG_MODE_OPEN_DIR, \\
+				[], func(status : bool, selected_paths : PackedStringArray, selected_filter_index : int):
+					if (!status) : 
+						return;
+					var file_path : String = selected_paths[0].replace(\"\\\\\", \"/\");
+					project_directories = file_path;
+					update_project_path(project_name_edit.text);
+		); # 获取文件夹路径填入
+		%ProjectPathErrorLabel.hide();
+	);
+	
+	%ProjectNameEdit.text_changed.connect(func(new_text : String) :
+		update_project_path(new_text);
+		if (!new_text.is_empty()) : 
+			%ProjectNameErrorLabel.hide();
+	);
+	# 当使用默认项目名的时候更新项目路径编辑器的内容
+	
+	%ProjectPathEdit.text_changed.connect(func(new_text : String) : 
+		if (!project_path_edit.text.is_empty()) : 
+			%ProjectPathErrorLabel.hide();
+			var _len : int = new_text.get_file().length();
+			project_directories = new_text.erase(new_text.length() - _len, _len);
+		);
+
+
+
+
+
+func update_project_path(new_text : String = \"\") : 
+	var _len : int = new_text.get_file().length();
+	var project_directories = %ProjectPathEdit.text.erase(new_text.length() - _len, _len);
+	project_path_edit.text = project_directories + \"/\" + new_text;
+	# 更新项目路径文本编辑器的内容
+
+func get_default_project_name() -> String :
+	var file_path : String = OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS) + \"/\" + \\
+			Global.EDITOR_NAME + \"/\" + Global.DEFAULT_PROJECT_NAME;
+	var count : int = 0;
+	
+	var currect_path : String = file_path;
+	while(DirAccess.dir_exists_absolute(currect_path)) :
+		count += 1;
+		currect_path = file_path + str(count);
+	if (count > 0) : 
+		return Global.DEFAULT_PROJECT_NAME + str(count);
+	return Global.DEFAULT_PROJECT_NAME;
+	# 获取路径上有效的默认项目名称
+
+func create_project() -> ProjectConfig : 
+	var proj : ProjectConfig = ProjectConfig.new();
+	proj.project_name = project_name_edit.text;
+	if (proj.project_name.is_empty() || !proj.project_name.is_valid_filename()) : 
+		%ProjectNameErrorLabel.text = \"为空或项目名称无效\";
+		%ProjectNameErrorLabel.show();
+		return;
+	# 检查项目名
+	
+	var _len : int = new_text.get_file().length();
+	var project_directories = %ProjectPathEdit.text.erase(new_text.length() - _len, _len);
+	if (!DirAccess.dir_exists_absolute(OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS) + \"/\" + Global.EDITOR_NAME)) : 
+		DirAccess.make_dir_absolute(OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS) + \"/\" + Global.EDITOR_NAME);
+	if (project_path_edit.text.is_empty() || !project_path_edit.text.is_absolute_path() || \\
+				 !DirAccess.dir_exists_absolute(project_directories)) : 
+		%ProjectPathErrorLabel.text = \"为空或项目位置无效\";
+		%ProjectPathErrorLabel.show();
+		return;
+	# 检查项目路径
+	proj.project_path = project_directories;
+	
+	proj.addons_version = [
+		int(%AddonsVersionEdit1.text),
+		int(%AddonsVersionEdit2.text),
+		int(%AddonsVersionEdit3.text),
+	];
+	# 构建 Add-ons 版本号
+	
+	proj.save_project();
+	
+	return proj;
+	
+
+
+
+
+func _on_create_project_button_pressed():
+	var mca_proj : ProjectConfig = create_project();
+	if (mca_proj == null) : 
+		return;
+	MainGUI.change_scene_to_file(\"res://Scenes/Editor.tscn\");
+	
+	
+"
+
+[sub_resource type="LabelSettings" id="LabelSettings_ag2hs"]
+font = ExtResource("1_v4wyq")
+font_size = 25
+
+[sub_resource type="LabelSettings" id="LabelSettings_tbqnw"]
+font_color = Color(0.960784, 0.145098, 0.113725, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_vskha"]
+texture = ExtResource("5_nfboc")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bd8kg"]
+texture = ExtResource("6_xii8a")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1mmdu"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_dbs6f"]
+resource_local_to_scene = true
+texture = ExtResource("8_kwie8")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 3.0
+texture_margin_bottom = 2.0
+expand_margin_left = 4.0
+expand_margin_top = 2.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_5mmfd"]
+resource_local_to_scene = true
+texture = ExtResource("8_kwie8")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 3.0
+texture_margin_bottom = 2.0
+expand_margin_left = 4.0
+expand_margin_top = 2.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_qd0c1"]
+resource_local_to_scene = true
+texture = ExtResource("8_kwie8")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 3.0
+texture_margin_bottom = 2.0
+expand_margin_left = 4.0
+expand_margin_top = 2.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_xl0x1"]
+texture = ExtResource("3_qno0c")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_pwsn4"]
+texture = ExtResource("6_i81f0")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_22m31"]
+
+[node name="MarginContainer" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_right = 15
+script = SubResource("GDScript_50tnv")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_bottom = 7
+
+[node name="Label" type="Label" parent="VBoxContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
+text = "新建项目"
+label_settings = SubResource("LabelSettings_ag2hs")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="ProjectName" type="VBoxContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ProjectNameLable" type="Label" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ProjectName"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_hoi8f")
+text = "项目名称"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ProjectName"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="ProjectNameEdit" type="LineEdit" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ProjectName/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(640, 30)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_styles/normal = ExtResource("3_t77f3")
+theme_override_styles/focus = ExtResource("4_up3n0")
+max_length = 70
+caret_blink = true
+
+[node name="ProjectNameErrorLabel" type="Label" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ProjectName/HBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_fonts/font = ExtResource("4_hoi8f")
+text = "项目名称不能为空"
+label_settings = SubResource("LabelSettings_tbqnw")
+
+[node name="ProjectPath" type="VBoxContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ProjectPath"]
+layout_mode = 2
+theme_override_constants/margin_right = 25
+
+[node name="ProjectPathLable" type="Label" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ProjectPath/MarginContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_hoi8f")
+text = "项目路径"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ProjectPath"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ProjectPath/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 5
+
+[node name="ProjectPathEdit" type="LineEdit" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ProjectPath/HBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_styles/normal = ExtResource("3_t77f3")
+theme_override_styles/focus = ExtResource("4_up3n0")
+caret_blink = true
+
+[node name="ProjectPathButton" type="Button" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ProjectPath/HBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(35, 0)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_vskha")
+theme_override_styles/hover = SubResource("StyleBoxTexture_vskha")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_bd8kg")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_1mmdu")
+text = "..."
+
+[node name="ProjectPathErrorLabel" type="Label" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ProjectPath/HBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_fonts/font = ExtResource("4_hoi8f")
+text = "项目路径不能为空"
+label_settings = SubResource("LabelSettings_tbqnw")
+
+[node name="AddonsVersion" type="MarginContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 7
+
+[node name="AddonsVersion" type="HBoxContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/AddonsVersion"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="AddonsVersionLabel" type="Label" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/AddonsVersion/AddonsVersion"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_hoi8f")
+text = "Add-ons 版本"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/AddonsVersion/AddonsVersion"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AddonsVersionEdit1" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/AddonsVersion/AddonsVersion/HBoxContainer" instance=ExtResource("7_mtvb6")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_dbs6f")
+theme_override_styles/focus = ExtResource("4_up3n0")
+text = "1"
+input_filter = 2
+
+[node name="AddonsVersionEdit2" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/AddonsVersion/AddonsVersion/HBoxContainer" instance=ExtResource("7_mtvb6")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_5mmfd")
+theme_override_styles/focus = ExtResource("4_up3n0")
+text = "0"
+input_filter = 2
+
+[node name="AddonsVersionEdit3" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/AddonsVersion/AddonsVersion/HBoxContainer" instance=ExtResource("7_mtvb6")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_qd0c1")
+theme_override_styles/focus = ExtResource("4_up3n0")
+text = "0"
+input_filter = 2
+
+[node name="MinEngineVersion" type="MarginContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 5
+
+[node name="MinEngineVersion" type="HBoxContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/MinEngineVersion"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="AddonsVersionLabel" type="Label" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/MinEngineVersion/MinEngineVersion"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_hoi8f")
+text = "最小Add-ons引擎版本"
+
+[node name="OptionButton" type="OptionButton" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/MinEngineVersion/MinEngineVersion"]
+layout_mode = 2
+item_count = 4
+selected = 0
+popup/item_0/text = "1.8.0"
+popup/item_0/id = 0
+popup/item_1/text = "1.12.0"
+popup/item_1/id = 1
+popup/item_2/text = "1.16.0"
+popup/item_2/id = 2
+popup/item_3/text = "1.20.0"
+popup/item_3/id = 3
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer/VBoxContainer2"]
+layout_mode = 2
+theme_override_constants/margin_right = 45
+theme_override_constants/margin_bottom = 15
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/VBoxContainer2/MarginContainer2"]
+layout_mode = 2
+
+[node name="CreateProjectButton" type="Button" parent="VBoxContainer/VBoxContainer2/MarginContainer2/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 35)
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_styles/normal = SubResource("StyleBoxTexture_xl0x1")
+theme_override_styles/hover = SubResource("StyleBoxTexture_xl0x1")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_pwsn4")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_22m31")
+text = "创建项目"
+
+[connection signal="pressed" from="VBoxContainer/VBoxContainer2/MarginContainer2/HBoxContainer/CreateProjectButton" to="." method="_on_create_project_button_pressed"]

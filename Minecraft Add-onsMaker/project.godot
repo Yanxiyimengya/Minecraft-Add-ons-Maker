@@ -1,0 +1,43 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Minecraft Add-onsMaker"
+run/main_scene="res://Scenes/MainScene/MainScene.tscn"
+config/use_custom_user_dir=true
+config/features=PackedStringArray("4.2", "C#", "Mobile")
+run/max_fps=120
+config/icon="res://Assets/icon.png"
+
+[autoload]
+
+Global="*res://Scripts/Autoload/Global.gd"
+MainGUI="*res://Scenes/MainGUI.tscn"
+ProjectManager="*res://Scripts/Autoload/ProjectManager.gd"
+WindowManager="*res://Scenes/WindowManager.tscn"
+ResourceManager="*res://Scripts/Autoload/ResourceManager.gd"
+
+[display]
+
+window/subwindows/embed_subwindows=false
+window/vsync/vsync_mode=0
+
+[dotnet]
+
+project/assembly_name="Minecraft Add-onsMaker"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/dockable_container/plugin.cfg")
+
+[rendering]
+
+renderer/rendering_method="mobile"

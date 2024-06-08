@@ -1,0 +1,86 @@
+[gd_scene load_steps=9 format=3 uid="uid://y2mlsfnvi6e6"]
+
+[ext_resource type="StyleBox" uid="uid://c6yr8g403yxnb" path="res://Assets/Theme/Styles/DarkButtonNormal.tres" id="1_7l6x7"]
+[ext_resource type="Texture2D" uid="uid://c32ttwojjlnb0" path="res://Assets/Images/Icons/grass_block.png" id="1_v30rq"]
+[ext_resource type="StyleBox" uid="uid://dhaaw3qchgf6y" path="res://Assets/Theme/Styles/DarkButtonPressed.tres" id="2_fakyu"]
+[ext_resource type="FontFile" uid="uid://cin6d10brxghd" path="res://Assets/Fonts/NotoSans-Bold-5.ttf" id="2_nlkwp"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_imag5"]
+
+[sub_resource type="GDScript" id="GDScript_i13vk"]
+script/source = "extends PanelContainer;
+@onready var button = $Button;
+
+@export var text : String = \"\" : 
+	set(value) : 
+		%Label.text = value;
+	get : 
+		return %Label.text;
+
+@export var texture : Texture = null : 
+	set(value) : 
+		%TextureRect.texture = value;
+	get : 
+		return %TextureRect.texture;
+"
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0oe6x"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_hwljt"]
+font = ExtResource("2_nlkwp")
+font_size = 20
+
+[node name="ProjectTypeBar" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_imag5")
+script = SubResource("GDScript_i13vk")
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 2
+theme_override_styles/normal = ExtResource("1_7l6x7")
+theme_override_styles/hover = ExtResource("1_7l6x7")
+theme_override_styles/pressed = ExtResource("2_fakyu")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_0oe6x")
+toggle_mode = true
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 45
+theme_override_constants/margin_right = 45
+theme_override_constants/margin_bottom = 40
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/MarginContainer"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 15
+
+[node name="CenterContainer" type="CenterContainer" parent="CenterContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="CenterContainer/MarginContainer/VBoxContainer/CenterContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("1_v30rq")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="CenterContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Minecraft 资源包"
+label_settings = SubResource("LabelSettings_hwljt")
+horizontal_alignment = 1
+vertical_alignment = 1

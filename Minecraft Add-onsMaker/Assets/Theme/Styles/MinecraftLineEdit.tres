@@ -1,0 +1,14 @@
+[gd_resource type="StyleBoxTexture" load_steps=2 format=3 uid="uid://bimera0suldvh"]
+
+[ext_resource type="Texture2D" uid="uid://doy16rt3m3776" path="res://Assets/Images/GUI/line_edit.png" id="1_tcdp6"]
+
+[resource]
+resource_local_to_scene = true
+content_margin_left = 8.0
+content_margin_top = 6.0
+content_margin_bottom = 4.0
+texture = ExtResource("1_tcdp6")
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0

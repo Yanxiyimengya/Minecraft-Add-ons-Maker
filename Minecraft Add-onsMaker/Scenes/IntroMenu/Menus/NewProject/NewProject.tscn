@@ -1,0 +1,202 @@
+[gd_scene load_steps=13 format=3 uid="uid://704chco0nouh"]
+
+[ext_resource type="FontFile" uid="uid://cin6d10brxghd" path="res://Assets/Fonts/NotoSans-Bold-5.ttf" id="1_leuxv"]
+[ext_resource type="Theme" uid="uid://c3gb35qykvkhd" path="res://Assets/Theme/EditorGUI.tres" id="1_p57hj"]
+[ext_resource type="FontFile" uid="uid://drraurnpg8khi" path="res://Assets/Fonts/Unifont.otf" id="2_ualiq"]
+[ext_resource type="PackedScene" uid="uid://csh8dxyn1sa3g" path="res://Scenes/IntroMenu/Menus/NewProject/ProjectSetting/Resource.tscn" id="4_kkcty"]
+[ext_resource type="Texture2D" uid="uid://ctdf6tdlmfbaf" path="res://Assets/Images/GUI/ui_button.png" id="9_42rsb"]
+[ext_resource type="Texture2D" uid="uid://cimix7ngnx86v" path="res://Assets/Images/GUI/ui_button_hover.png" id="10_q043r"]
+
+[sub_resource type="GDScript" id="GDScript_50tnv"]
+script/source = "extends MarginContainer;
+
+@onready var project_setting_menu = %ProjectSettingMenu;
+
+var project_type_button_group : ButtonGroup = ButtonGroup.new();
+var project_type_button_map : Dictionary = {};
+var currect_setting_ui : Node = null;
+
+func _ready() : 
+	change_project_setting_ui(
+		load(\"res://Scenes/IntroMenu/Menus/NewProject/ProjectSetting/Resource.tscn\").instantiate()
+	);
+	add_project_type(\"资源包\", preload(\"res://Assets/Images/Icons/grass_block.png\"), ProjectConfig.PROJECT_TYPE_RESOURCE);
+	add_project_type(\"行为包\", preload(\"res://Assets/Images/Icons/dirt_block.png\"), ProjectConfig.PROJECT_TYPE_DATA);
+	add_project_type(\"附加包\", preload(\"res://Assets/Images/Icons/bookshelf_block.png\"));
+
+
+func change_project_setting_ui(ui : Node) : 
+	if (ui == null) : 
+		return;
+	currect_setting_ui = ui;
+	project_setting_menu.add_child(ui);
+	# 更改子UI 
+
+const PROJECT_TYPE_BAR : PackedScene = preload(\"res://Scenes/IntroMenu/Menus/NewProject/ProjectTypeBar.tscn\");
+func add_project_type(text : String, icon : Texture = null, type : String = \"\") : 
+	var t_button : Node = PROJECT_TYPE_BAR.instantiate();
+	%ProjectButtonContainer.add_child(t_button);
+	if (%ProjectButtonContainer.get_child_count() <= 1) : 
+		t_button.button.button_pressed = true;
+	t_button.text = text;
+	
+	if (icon) : 
+		t_button.texture = icon;
+	t_button.button.toggle_mode = true;
+	t_button.button.button_group = project_type_button_group;
+	project_type_button_map[t_button.button] = type;
+	# 添加一个项目类型选项
+
+func _on_create_project_button_pressed() : 
+	if (currect_setting_ui == null || !currect_setting_ui.has_method(\"_create_project\")) : 
+		return;
+	var mca_proj : ProjectConfig = currect_setting_ui.call(\"_create_project\");
+	if (mca_proj == null) : 
+		return;
+	# 调用_create_project函数检测项目配置是否正确
+	
+	var pressed_button : BaseButton = project_type_button_group.get_pressed_button();
+	if (pressed_button == null) : 
+		return;
+	mca_proj.project_type = project_type_button_map[pressed_button];
+	# 检测并设置项目类型
+	
+	mca_proj.save_project();
+	
+	Global.cache.add_project_config(mca_proj);
+	ProjectManager.open_project(mca_proj);
+	
+"
+
+[sub_resource type="LabelSettings" id="LabelSettings_ag2hs"]
+font = ExtResource("1_leuxv")
+font_size = 25
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bqw2t"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_xl0x1"]
+texture = ExtResource("9_42rsb")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_pwsn4"]
+texture = ExtResource("10_q043r")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_22m31"]
+
+[node name="MarginContainer" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_p57hj")
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_right = 15
+script = SubResource("GDScript_50tnv")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_bottom = 7
+
+[node name="Label" type="Label" parent="VBoxContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
+text = "新建项目"
+label_settings = SubResource("LabelSettings_ag2hs")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+follow_focus = true
+horizontal_scroll_mode = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 7
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ProjectTypeLable" type="Label" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/VBoxContainer2"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_ualiq")
+text = "项目类型"
+
+[node name="ProjectType" type="ScrollContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/VBoxContainer2"]
+layout_mode = 2
+follow_focus = true
+vertical_scroll_mode = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/VBoxContainer2/ProjectType"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="ProjectButtonContainer" type="HBoxContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/VBoxContainer2/ProjectType/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="ProjectSettingMenu" type="PanelContainer" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_bqw2t")
+
+[node name="Resource" parent="VBoxContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ProjectSettingMenu" instance=ExtResource("4_kkcty")]
+layout_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer/VBoxContainer2"]
+layout_mode = 2
+theme_override_constants/margin_right = 45
+theme_override_constants/margin_bottom = 15
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/VBoxContainer2/MarginContainer2"]
+layout_mode = 2
+
+[node name="CreateProjectButton" type="Button" parent="VBoxContainer/VBoxContainer2/MarginContainer2/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 35)
+layout_mode = 2
+size_flags_horizontal = 10
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_xl0x1")
+theme_override_styles/hover = SubResource("StyleBoxTexture_xl0x1")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_pwsn4")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_22m31")
+text = "创建项目"
+
+[connection signal="pressed" from="VBoxContainer/VBoxContainer2/MarginContainer2/HBoxContainer/CreateProjectButton" to="." method="_on_create_project_button_pressed"]

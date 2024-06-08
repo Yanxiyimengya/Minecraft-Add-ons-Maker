@@ -1,0 +1,162 @@
+[gd_scene load_steps=9 format=3 uid="uid://du1x8luuyccf7"]
+
+[ext_resource type="FontFile" uid="uid://cin6d10brxghd" path="res://Assets/Fonts/NotoSans-Bold-5.ttf" id="1_tg6bc"]
+[ext_resource type="Texture2D" uid="uid://d3xd4b6gbp2yt" path="res://Assets/Images/GUI/cross.png" id="2_osvd7"]
+[ext_resource type="FontFile" uid="uid://drraurnpg8khi" path="res://Assets/Fonts/Unifont.otf" id="3_vt1vn"]
+
+[sub_resource type="GDScript" id="GDScript_pwgah"]
+script/source = "extends Node;
+
+@onready var top_menu = $TopMenu;
+
+var currect_window : Node = null;
+var currect_window_id : int = -1;
+
+enum WindowID {
+	Dialog,
+	
+	WindowCount
+};
+
+
+# Dialog Window
+@onready var dialog_window_cross_button = %CrossButton;
+
+func _ready() : 
+	dialog_window_cross_button.pressed.connect(func() :
+		close_window();
+		);
+
+func open_window(window_id : WindowID) : 
+	if (window_id >= WindowID.WindowCount) : 
+		return;
+	top_menu.visible = true;
+	if (currect_window != null) : 
+		currect_window.visible = false;
+	match(window_id) :
+		WindowID.Dialog : 
+			get_tree().create_tween().tween_property(%DialogWindow, 
+					\"color:a\", 0.75, 0.25).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE).from(0.0);
+			currect_window = %DialogWindow;
+			# 打开对话框
+	currect_window_id = window_id;
+	currect_window.visible = true;
+
+func close_window() :
+	top_menu.visible = false;
+	if (currect_window == null) : 
+		return;
+	
+	match(currect_window_id) :
+		WindowID.Dialog : 
+			pass;
+	
+	currect_window.visible = false;
+
+func set_dialog_window_title(title : String) :
+	%DialogWindowTitleLabel.text = title;
+func set_dialog_window_message(message : String) :
+	%DialogWindowMessageLable.text = message;
+
+"
+
+[sub_resource type="GDScript" id="GDScript_yqpms"]
+script/source = "extends ColorRect;
+
+func _gui_input(event : InputEvent) : 
+	if (event is InputEventMouseButton && event.is_pressed()) : 
+		WindowManager.close_window();
+"
+
+[sub_resource type="LabelSettings" id="LabelSettings_fbn7e"]
+font = ExtResource("1_tg6bc")
+font_size = 20
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_22q6u"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_vtyfi"]
+line_spacing = 10.0
+font = ExtResource("3_vt1vn")
+
+[node name="WindowManager" type="Node"]
+script = SubResource("GDScript_pwgah")
+
+[node name="TopMenu" type="CanvasLayer" parent="."]
+
+[node name="DialogWindow" type="ColorRect" parent="TopMenu"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0, 0, 0, 0)
+script = SubResource("GDScript_yqpms")
+
+[node name="CenterContainer" type="CenterContainer" parent="TopMenu/DialogWindow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="TopMenu/DialogWindow/CenterContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="TopMenu/DialogWindow/CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TopMenu/DialogWindow/CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TopMenu/DialogWindow/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="MarginContainer" type="MarginContainer" parent="TopMenu/DialogWindow/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+
+[node name="DialogWindowTitleLabel" type="Label" parent="TopMenu/DialogWindow/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "WindowTitle"
+label_settings = SubResource("LabelSettings_fbn7e")
+
+[node name="CrossButton" type="TextureButton" parent="TopMenu/DialogWindow/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+texture_normal = ExtResource("2_osvd7")
+
+[node name="Panel" type="Panel" parent="TopMenu/DialogWindow/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(270, 100)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_22q6u")
+
+[node name="CenterContainer" type="CenterContainer" parent="TopMenu/DialogWindow/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DialogWindowMessageLable" type="Label" parent="TopMenu/DialogWindow/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Panel/CenterContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+text = "Dialog Message..."
+label_settings = SubResource("LabelSettings_vtyfi")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 1

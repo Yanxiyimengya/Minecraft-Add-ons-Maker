@@ -1,0 +1,49 @@
+[gd_resource type="Theme" load_steps=11 format=3 uid="uid://drxi164xmuler"]
+
+[ext_resource type="FontFile" uid="uid://drraurnpg8khi" path="res://Assets/Fonts/Unifont.otf" id="1_8rxoj"]
+[ext_resource type="FontFile" uid="uid://bt42veg08buia" path="res://Assets/Fonts/MinecraftAECN.ttf" id="1_77axx"]
+[ext_resource type="StyleBox" uid="uid://bv8vx8r8rwplb" path="res://Assets/Theme/Styles/MinecraftLineEditFocus.tres" id="3_w3j6t"]
+[ext_resource type="StyleBox" uid="uid://bimera0suldvh" path="res://Assets/Theme/Styles/MinecraftLineEdit.tres" id="4_n75qo"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_l5wuc"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_utgon"]
+load_path = "res://.godot/imported/button.png-c60353868c04814f31c646a264e95a83.ctex"
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_sgoig"]
+texture = SubResource("CompressedTexture2D_utgon")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 5.0
+expand_margin_left = 1.0
+expand_margin_top = 1.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_pjymq"]
+load_path = "res://.godot/imported/button_pressed.png-56638524bf008011f6f236db9d67bd8f.ctex"
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_3i82t"]
+texture = SubResource("CompressedTexture2D_pjymq")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pw5ub"]
+bg_color = Color(0.0980392, 0.0980392, 0.0980392, 1)
+
+[resource]
+Button/font_sizes/font_size = 16
+Button/fonts/font = ExtResource("1_77axx")
+Button/styles/focus = SubResource("StyleBoxEmpty_l5wuc")
+Button/styles/hover = SubResource("StyleBoxTexture_sgoig")
+Button/styles/normal = SubResource("StyleBoxTexture_sgoig")
+Button/styles/pressed = SubResource("StyleBoxTexture_3i82t")
+Label/fonts/font = ExtResource("1_8rxoj")
+LineEdit/colors/caret_color = Color(0.443137, 0.803922, 0.294118, 1)
+LineEdit/constants/caret_width = 2
+LineEdit/styles/focus = ExtResource("3_w3j6t")
+LineEdit/styles/normal = ExtResource("4_n75qo")
+Panel/styles/panel = SubResource("StyleBoxFlat_pw5ub")

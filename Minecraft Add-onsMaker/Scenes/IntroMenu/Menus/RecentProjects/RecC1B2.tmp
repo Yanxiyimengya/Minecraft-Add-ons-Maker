@@ -1,0 +1,158 @@
+[gd_scene load_steps=7 format=3 uid="uid://c8p4j65gel6u6"]
+
+[ext_resource type="Theme" uid="uid://c3gb35qykvkhd" path="res://Assets/Theme/EditorGUI.tres" id="1_iktgb"]
+[ext_resource type="FontFile" uid="uid://cin6d10brxghd" path="res://Assets/Fonts/NotoSans-Bold-5.ttf" id="2_t0x46"]
+[ext_resource type="FontFile" uid="uid://bt42veg08buia" path="res://Assets/Fonts/MinecraftAECN.ttf" id="3_e1p8b"]
+
+[sub_resource type="GDScript" id="GDScript_k16qv"]
+script/source = "extends MarginContainer;
+
+const PROJECT_BAR = preload(\"res://Scenes/IntroMenu/Menus/RecentProjects/ProjectBar.tscn\");
+
+var project_item_button_group : ButtonGroup = ButtonGroup.new();
+var project_item : Array[Node] = [];
+
+func _ready() : 
+	Global.cache.load_cache(\"user://projects.csv\");
+	for proj in Global.cache.project_configs : 
+		var data : EditorConfig.ProjectCacheData = Global.cache.project_configs[proj];
+		add_project_item(data);
+
+func _process(_delta) : 
+	conversion_no_project(project_item.is_empty());
+
+var currect_select_project : Node = null;
+func add_project_item(proj_data : EditorConfig.ProjectCacheData) -> Node : 
+	var proj_bar : Node = PROJECT_BAR.instantiate();
+	proj_bar.project_data = proj_data;
+	project_item.append(proj_bar);
+	%ProjectBarContainer.add_child(proj_bar);
+	
+	proj_bar.button.button_group = project_item_button_group;
+	proj_bar.gui_input.connect(func(event : InputEvent) : 
+		if (event is InputEventMouseButton) : 
+			if (!proj_bar.button.has_focus()) : 
+				return;
+			if (event.double_click && event.button_mask == MOUSE_BUTTON_MASK_LEFT) : 
+				pass;
+			if (event.is_pressed() && event.button_mask == MOUSE_BUTTON_MASK_RIGHT) :
+				currect_select_project = proj_bar;
+				$PopupMenu.visible = true;
+				$PopupMenu.position = DisplayServer.mouse_get_position();
+			);
+	return proj_bar;
+func remove_project_item(item_node : Node) : 
+	project_item.erase(item_node);
+	Global.cache.remove_project_config(item_node.project_data);
+	item_node.queue_free();
+
+func _on_popup_menu_id_pressed(id : int) : 
+	if (currect_select_project == null) : 
+		return;
+	match(id) : 
+		0 : 
+			var f_path : String = currect_select_project.path;
+			if (!DirAccess.dir_exists_absolute(f_path)) : 
+				WindowManager.set_dialog_window_title(\"出了点问题\");
+				WindowManager.set_dialog_window_message(\"无法打开项目文件夹\\r项目可能被删除或移动\");
+				WindowManager.open_window(WindowManager.WindowID.Dialog);
+				return;
+			var proj : ProjectConfig = ProjectConfig.load_project(f_path);
+			if (proj == null) : 
+				WindowManager.set_dialog_window_title(\"出了点问题\");
+				WindowManager.set_dialog_window_message(\"无法解析项目文件\\r或项目文件不存在\");
+				WindowManager.open_window(WindowManager.WindowID.Dialog);
+				return;
+			ProjectManager.open_project(proj);
+		1 : 
+			currect_select_project.item_rename();
+			pass;
+		2 : 
+			remove_project_item(currect_select_project);
+			pass;
+
+func conversion_no_project(enable : bool) : 
+	if (enable) :
+		%ProgramBar.visible = false;
+		%NoProjectLabel.visible = true;
+	else : 
+		%ProgramBar.visible = true;
+		%NoProjectLabel.visible = false;
+
+func open_project() : 
+	pass;
+"
+
+[sub_resource type="LabelSettings" id="LabelSettings_ag2hs"]
+font = ExtResource("2_t0x46")
+font_size = 25
+
+[sub_resource type="LabelSettings" id="LabelSettings_7fw6u"]
+font = ExtResource("3_e1p8b")
+font_color = Color(0.737255, 0.737255, 0.737255, 1)
+
+[node name="RecentProjects" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_iktgb")
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_right = 15
+script = SubResource("GDScript_k16qv")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_bottom = 7
+
+[node name="Label" type="Label" parent="VBoxContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
+text = "最近项目"
+label_settings = SubResource("LabelSettings_ag2hs")
+
+[node name="ProgramBar" type="MarginContainer" parent="VBoxContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="ProjectBarContainer" type="VBoxContainer" parent="VBoxContainer/VBoxContainer/ProgramBar"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="NoProjectLabel" type="Label" parent="VBoxContainer/VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+text = "未找到项目"
+label_settings = SubResource("LabelSettings_7fw6u")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PopupMenu" type="PopupMenu" parent="."]
+size = Vector2i(122, 80)
+item_count = 3
+item_0/text = "打开项目"
+item_0/id = 0
+item_1/text = "重命名"
+item_1/id = 1
+item_2/text = "从列表中移除"
+item_2/id = 2
+
+[connection signal="id_pressed" from="PopupMenu" to="." method="_on_popup_menu_id_pressed"]

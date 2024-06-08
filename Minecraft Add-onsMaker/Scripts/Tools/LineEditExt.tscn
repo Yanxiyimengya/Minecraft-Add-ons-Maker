@@ -1,0 +1,55 @@
+[gd_scene load_steps=2 format=3 uid="uid://cs0i4kt4ajatc"]
+
+[sub_resource type="GDScript" id="GDScript_khd6x"]
+script/source = "extends LineEdit;
+class_name LineEditExt;
+
+enum InputFilter {
+	Disabled,
+	LtainOnly,
+	NumbersOnly
+};
+
+@export var input_filter : InputFilter = InputFilter.Disabled;
+
+func _ready():
+	var menu : PopupMenu = get_menu();
+	
+	menu.set_item_text(menu.get_item_index(MENU_CUT), \"剪切\");
+	menu.set_item_text(menu.get_item_index(MENU_COPY), \"复制\");
+	menu.set_item_text(menu.get_item_index(MENU_PASTE), \"粘贴\");
+	
+	menu.set_item_text(menu.get_item_index(MENU_SELECT_ALL), \"全选\");
+	menu.set_item_text(menu.get_item_index(MENU_CLEAR), \"清空\");
+	
+	menu.set_item_text(menu.get_item_index(MENU_UNDO), \"撤销\");
+	menu.set_item_text(menu.get_item_index(MENU_REDO), \"重做\");
+	
+	menu.remove_item(menu.get_item_index(MENU_DISPLAY_UCC));
+	menu.remove_item(menu.get_item_index(MENU_SUBMENU_TEXT_DIR)-1);
+	menu.remove_item(menu.get_item_index(MENU_SUBMENU_TEXT_DIR));
+	menu.remove_item(menu.get_item_index(MENU_SUBMENU_INSERT_UCC)-1);
+	menu.remove_item(menu.get_item_index(MENU_SUBMENU_INSERT_UCC));
+	
+
+func _gui_input(event : InputEvent) : 
+	if event is InputEventKey : 
+		if (event.keycode > 4194304) : 
+			return;
+		match (input_filter) : 
+			InputFilter.NumbersOnly : 
+				if !(event.unicode >= 0x30 && event.unicode <= 0x39) :
+					get_viewport().set_input_as_handled();
+			InputFilter.LtainOnly : 
+				if !((event.unicode >= 0x61 && event.unicode <= 0x7a) && \\
+						(event.unicode >= 0x41 && event.unicode <= 0x5a)):
+					get_viewport().set_input_as_handled();
+
+func _on_text_submitted(_new_text : String):
+	release_focus();
+"
+
+[node name="LineEditExt" type="LineEdit"]
+script = SubResource("GDScript_khd6x")
+
+[connection signal="text_submitted" from="." to="." method="_on_text_submitted"]

@@ -1,0 +1,86 @@
+[gd_scene load_steps=8 format=3 uid="uid://bd7o1rt5se84m"]
+
+[ext_resource type="Theme" uid="uid://c3gb35qykvkhd" path="res://Assets/Theme/EditorGUI.tres" id="1_eyx2j"]
+[ext_resource type="Script" path="res://Scripts/Scenes/MainGUI.gd" id="2_rfkno"]
+[ext_resource type="FontFile" uid="uid://cin6d10brxghd" path="res://Assets/Fonts/NotoSans-Bold-5.ttf" id="3_yy1ep"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2htbg"]
+bg_color = Color(0.109804, 0.109804, 0.113725, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sj1tk"]
+bg_color = Color(0.137255, 0.137255, 0.141176, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_bar7j"]
+font = ExtResource("3_yy1ep")
+font_size = 14
+font_color = Color(0.580392, 0.580392, 0.580392, 1)
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_lgwkq"]
+color = Color(0.0627451, 0.0627451, 0.0627451, 1)
+
+[node name="MainGUI" type="Panel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_eyx2j")
+theme_override_styles/panel = SubResource("StyleBoxFlat_2htbg")
+script = ExtResource("2_rfkno")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_sj1tk")
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 7
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="TopBar" type="HBoxContainer" parent="VBoxContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="ButtonBar" type="HBoxContainer" parent="VBoxContainer/PanelContainer/MarginContainer/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/PanelContainer/MarginContainer/TopBar"]
+layout_mode = 2
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 5
+
+[node name="VersionLable" type="Label" parent="VBoxContainer/PanelContainer/MarginContainer/TopBar/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Version 2024.6.3"
+label_settings = SubResource("LabelSettings_bar7j")
+
+[node name="Panel" type="Panel" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxLine_lgwkq")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+stretch = true
+
+[node name="MenuViewport" type="SubViewport" parent="VBoxContainer/SubViewportContainer"]
+unique_name_in_owner = true
+transparent_bg = true
+handle_input_locally = false
+canvas_item_default_texture_filter = 0
+size = Vector2i(1152, 613)
+render_target_update_mode = 4

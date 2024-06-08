@@ -1,0 +1,201 @@
+[gd_scene load_steps=17 format=3 uid="uid://dw0r0x3mkx1yp"]
+
+[ext_resource type="Script" path="res://Scripts/IntroMenu.gd" id="1_iu8le"]
+[ext_resource type="Theme" uid="uid://c3gb35qykvkhd" path="res://Assets/Theme/EditorGUI.tres" id="1_kv8ly"]
+[ext_resource type="Texture2D" uid="uid://dyfdn4h7jxj8i" path="res://Assets/Images/Background/bg001.png" id="2_f43o3"]
+[ext_resource type="Texture2D" uid="uid://c7po8n3h0ouoq" path="res://Assets/icon.png" id="3_4k8eq"]
+[ext_resource type="FontFile" uid="uid://10yelk4k33w1" path="res://Assets/Fonts/MinecraftTen-VGORe.ttf" id="4_gfehv"]
+[ext_resource type="Texture2D" uid="uid://sml0vo8wveg8" path="res://Assets/Images/Icons/project_icon.png" id="5_no8k2"]
+[ext_resource type="Texture2D" uid="uid://lk4t6qpcyaad" path="res://Assets/Images/Icons/lib_icon.png" id="6_w2kf5"]
+[ext_resource type="Texture2D" uid="uid://dldbm40ivedtw" path="res://Assets/Images/Icons/box_panel.png" id="8_5yuna"]
+[ext_resource type="Texture2D" uid="uid://dfiwso67glpra" path="res://Assets/Images/Icons/setting.png" id="8_7gkco"]
+
+[sub_resource type="Shader" id="Shader_jrr5s"]
+code = "shader_type canvas_item;
+
+void fragment() {
+	COLOR.a = (UV.y * 0.5) - (UV.x * 0.05);
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_n315d"]
+shader = SubResource("Shader_jrr5s")
+
+[sub_resource type="LabelSettings" id="LabelSettings_qhqvh"]
+line_spacing = 0.0
+font = ExtResource("4_gfehv")
+font_size = 65
+shadow_color = Color(0, 0, 0, 1)
+shadow_offset = Vector2(4, 4)
+
+[sub_resource type="Shader" id="Shader_t36hc"]
+code = "shader_type canvas_item;
+
+void fragment() {
+	COLOR.a = sin(UV.x * PI) * 0.8;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1es0m"]
+shader = SubResource("Shader_t36hc")
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_gufit"]
+color = Color(0.0431373, 0.0431373, 0.0431373, 1)
+grow_begin = -15.0
+grow_end = -15.0
+thickness = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nmwvq"]
+bg_color = Color(0.0862745, 0.0862745, 0.0862745, 0.835294)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="IntroMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_kv8ly")
+script = ExtResource("1_iu8le")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+texture_filter = 2
+material = SubResource("ShaderMaterial_n315d")
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -362.0
+grow_horizontal = 2
+grow_vertical = 0
+texture = ExtResource("2_f43o3")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 15
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+
+[node name="Icon" type="TextureRect" parent="VBoxContainer/HBoxContainer/MarginContainer"]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+texture = ExtResource("3_4k8eq")
+expand_mode = 1
+
+[node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 35
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/MarginContainer2"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Minecraft Add-ons Maker"
+label_settings = SubResource("LabelSettings_qhqvh")
+vertical_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Panel" type="Panel" parent="VBoxContainer/MarginContainer"]
+material = SubResource("ShaderMaterial_1es0m")
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxLine_gufit")
+
+[node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 25
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 15
+
+[node name="VBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer2"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/MarginContainer2/VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/MarginContainer2/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="NewProjectButton" type="Button" parent="VBoxContainer/MarginContainer2/VBoxContainer/VBoxContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 35)
+layout_mode = 2
+keep_pressed_outside = true
+text = "新建项目"
+icon = ExtResource("5_no8k2")
+expand_icon = true
+
+[node name="PrivateProjectButton" type="Button" parent="VBoxContainer/MarginContainer2/VBoxContainer/VBoxContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 35)
+layout_mode = 2
+keep_pressed_outside = true
+text = "最近项目"
+icon = ExtResource("6_w2kf5")
+expand_icon = true
+
+[node name="Button3" type="Button" parent="VBoxContainer/MarginContainer2/VBoxContainer/VBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(140, 35)
+layout_mode = 2
+keep_pressed_outside = true
+text = "导入项目"
+icon = ExtResource("8_5yuna")
+expand_icon = true
+
+[node name="Button" type="Button" parent="VBoxContainer/MarginContainer2/VBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(140, 35)
+layout_mode = 2
+size_flags_vertical = 10
+text = "教程"
+icon = ExtResource("8_7gkco")
+expand_icon = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer2/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Panel" type="Panel" parent="VBoxContainer/MarginContainer2/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_nmwvq")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="VBoxContainer/MarginContainer2/VBoxContainer/HBoxContainer/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="VBoxContainer/MarginContainer2/VBoxContainer/HBoxContainer/Panel/SubViewportContainer"]
+unique_name_in_owner = true
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(942, 504)
+render_target_update_mode = 4
+
+[connection signal="resized" from="." to="." method="_on_resized"]
+[connection signal="pressed" from="VBoxContainer/MarginContainer2/VBoxContainer/VBoxContainer/VBoxContainer/NewProjectButton" to="." method="_on_new_project_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/MarginContainer2/VBoxContainer/VBoxContainer/VBoxContainer/PrivateProjectButton" to="." method="_on_private_project_button_pressed"]

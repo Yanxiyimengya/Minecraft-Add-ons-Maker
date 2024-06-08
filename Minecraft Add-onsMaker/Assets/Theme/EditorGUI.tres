@@ -1,0 +1,35 @@
+[gd_resource type="Theme" load_steps=11 format=3 uid="uid://c3gb35qykvkhd"]
+
+[ext_resource type="FontFile" uid="uid://bt42veg08buia" path="res://Assets/Fonts/MinecraftAECN.ttf" id="1_7tnoo"]
+[ext_resource type="StyleBox" uid="uid://dhaaw3qchgf6y" path="res://Assets/Theme/Styles/DarkButtonPressed.tres" id="2_npp7i"]
+[ext_resource type="FontFile" uid="uid://cin6d10brxghd" path="res://Assets/Fonts/NotoSans-Bold-5.ttf" id="2_ooqdv"]
+[ext_resource type="StyleBox" uid="uid://c6yr8g403yxnb" path="res://Assets/Theme/Styles/DarkButtonNormal.tres" id="3_lqdgn"]
+[ext_resource type="StyleBox" uid="uid://bv8vx8r8rwplb" path="res://Assets/Theme/Styles/MinecraftLineEditFocus.tres" id="5_4c04s"]
+[ext_resource type="StyleBox" uid="uid://bimera0suldvh" path="res://Assets/Theme/Styles/MinecraftLineEdit.tres" id="6_kee01"]
+[ext_resource type="Texture2D" uid="uid://cw78c58b1nt12" path="res://Assets/Images/GUI/down.png" id="7_708wo"]
+[ext_resource type="Texture2D" uid="uid://bfb8oaqxpal07" path="res://Assets/Images/GUI/double.png" id="7_udhpm"]
+
+[sub_resource type="ImageTexture" id="ImageTexture_wwoen"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_thh1p"]
+
+[resource]
+Button/fonts/font = ExtResource("1_7tnoo")
+Button/styles/focus = ExtResource("2_npp7i")
+Button/styles/hover = ExtResource("3_lqdgn")
+Button/styles/normal = ExtResource("3_lqdgn")
+Button/styles/pressed = ExtResource("2_npp7i")
+Label/fonts/font = ExtResource("2_ooqdv")
+LineEdit/constants/caret_width = 2
+LineEdit/font_sizes/font_size = 16
+LineEdit/fonts/font = ExtResource("1_7tnoo")
+LineEdit/styles/focus = ExtResource("5_4c04s")
+LineEdit/styles/normal = ExtResource("6_kee01")
+OptionButton/constants/arrow_margin = 5
+OptionButton/icons/arrow = ExtResource("7_708wo")
+PopupMenu/constants/v_separation = 8
+PopupMenu/fonts/font = ExtResource("1_7tnoo")
+PopupMenu/icons/radio_checked = ExtResource("7_udhpm")
+PopupMenu/icons/radio_unchecked = SubResource("ImageTexture_wwoen")
+PopupMenu/styles/hover = SubResource("StyleBoxFlat_thh1p")
+PopupMenu/styles/panel = ExtResource("3_lqdgn")

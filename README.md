@@ -1,4 +1,4 @@
-# Minecraft-Blocks
+# Minecraft-Add-ons-Maker
 
 ## A tool that allows you to easily create Minecraft Bedrock Edition add-ons
 

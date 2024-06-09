@@ -1,0 +1,49 @@
+[gd_scene load_steps=4 format=3 uid="uid://c2bxabh8gnkj1"]
+
+[ext_resource type="Script" path="res://Scenes/Editor/AttributeEditor/EditElement/TextureDisplay/TextureDisplay.gd" id="1_riire"]
+[ext_resource type="Texture2D" uid="uid://6mc8yneecj1i" path="res://Assets/Images/Background/texture_background.png" id="2_dwwcm"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_aiuqe"]
+texture = ExtResource("2_dwwcm")
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[node name="TextureDisplay" type="HBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+script = ExtResource("1_riire")
+title = "Texture Name"
+resource_path = "Texture Path"
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+texture_filter = 1
+clip_contents = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxTexture_aiuqe")
+
+[node name="Texture" type="TextureRect" parent="PanelContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+expand_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="FileNameDisplay" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Texture Name"
+
+[node name="FilePathDisplay" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Texture Path"

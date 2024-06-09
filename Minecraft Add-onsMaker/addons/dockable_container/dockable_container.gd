@@ -73,10 +73,10 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	set_process_input(false)
+	set_process_input(false);
 	_panel_container.name = "_panel_container"
 	add_child(_panel_container)
-	move_child(_panel_container, 0)
+	move_child(_panel_container, 0);
 	_split_container.name = "_split_container"
 	_split_container.mouse_filter = MOUSE_FILTER_PASS
 	_panel_container.add_child(_split_container)
@@ -94,7 +94,7 @@ func _ready() -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_SORT_CHILDREN:
-		_resort()
+		_resort();
 	elif (
 		what == NOTIFICATION_DRAG_BEGIN
 		and _can_handle_drag_data(get_viewport().gui_get_drag_data())
@@ -125,7 +125,7 @@ func _input(event: InputEvent) -> void:
 func _child_entered_tree(node: Node) -> void:
 	if node == _panel_container or node == _drag_n_drop_panel:
 		return
-	_drag_n_drop_panel.move_to_front()
+	_drag_n_drop_panel.move_to_front.call_deferred()
 	_track_and_add_node(node)
 
 
@@ -302,7 +302,8 @@ func _untrack_node(node: Node) -> void:
 func _resort() -> void:
 	assert(_panel_container, "FIXME: resorting without _panel_container")
 	if _panel_container.get_index() != 0:
-		move_child(_panel_container, 0)
+		move_child(_panel_container, 0);
+		pass;
 	if _drag_n_drop_panel.get_index() < get_child_count() - 1:
 		_drag_n_drop_panel.move_to_front()
 

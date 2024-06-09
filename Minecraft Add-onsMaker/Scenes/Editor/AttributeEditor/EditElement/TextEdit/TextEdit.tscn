@@ -1,20 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bq0hcta3y5b17"]
 
-[sub_resource type="GDScript" id="GDScript_2sn64"]
-script/source = "@tool
-extends HBoxContainer;
-@onready var line_edit = $LineEdit;
-@onready var label = $Label;
-
-@export var title : String = \"\";
-
-func _process(delta) : 
-	$Label.text = title;
-
-func get_attribute() -> String : 
-	return $LineEdit.text;
-	
-"
+[ext_resource type="Script" path="res://Scenes/Editor/AttributeEditor/EditElement/TextEdit/TextEdit.gd" id="1_cyu4j"]
 
 [node name="TextEdit" type="HBoxContainer"]
 anchors_preset = 15
@@ -22,7 +8,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = SubResource("GDScript_2sn64")
+script = ExtResource("1_cyu4j")
 
 [node name="Label" type="Label" parent="."]
 custom_minimum_size = Vector2(100, 0)

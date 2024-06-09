@@ -5,22 +5,17 @@ extends Node;
 var resource_tree : Tree = Tree.new();
 # 资源树
 
-enum ITEM_TYPE {
-	FOLDER,
+class ResourceData : 
+	extends RefCounted;
 	
-	TEXTURE
-};
-enum COLUMN_NAME {
-	NAME,
-	TYPE,
-	DATA
-};
+	var data : Resource = null;
+	var ascription : TreeItem = null;
+	var is_folder : bool = false;
 
 func _ready() : 
 	resource_tree.columns = 3;
 	resource_tree.create_item().set_text(0, "资源管理器");
 	# 创建资源树树根
-	
 
 func load_file(file_path : String) -> Resource : 
 	if (!FileAccess.file_exists(file_path)) : 
@@ -42,7 +37,7 @@ func load_resource_to_apped(file_path : String, tree_path : String) :
 	var parent_item : TreeItem = find_item_to_dir(tree_path);
 	if (parent_item == null) : 
 		return;
-	append_resource_to_tree(parent_item, file_path.get_file(), res);
+	append_resource_to_tree(file_path.get_file(), res, parent_item);
 	# 从磁盘的某个路径加载一个文件进入资源树
 
 func load_files(file_path : String, root : TreeItem = null) : 
@@ -62,28 +57,36 @@ func load_files(file_path : String, root : TreeItem = null) :
 		if (dir.current_is_dir()) : 
 			load_files(file_path+"/"+fname, create_folder(fname, root));
 		else : 
-			append_resource_to_tree(root, fname, load_file(file_path+"/"+fname));
+			append_resource_to_tree(fname, load_file(file_path+"/"+fname));
 			pass;
 		fname = dir.get_next();
 	dir.list_dir_end();
 	# 加载一个目录内的所有文件进入资源树
 
-func append_resource_to_tree(tree_item : TreeItem, res_name : String, res : Resource) -> TreeItem : 
-	var type : ITEM_TYPE;
-	if (res is Texture) : 
-		type = ITEM_TYPE.TEXTURE;
-	else : 
+func append_resource_to_tree(res_name : String, res : Resource, ascription : TreeItem = null) -> TreeItem : 
+	if (ascription != null && !ascription.get_metadata(0).is_folder) : 
 		return;
-	var item : TreeItem = tree_item.create_child();
-	item.set_metadata(COLUMN_NAME.NAME, res_name);
-	item.set_metadata(COLUMN_NAME.TYPE, type);
-	item.set_metadata(COLUMN_NAME.DATA, res);
+	elif (ascription == null) : 
+		ascription = resource_tree.get_root();
+	var item : TreeItem = ascription.create_child();
+	var res_data : ResourceData = ResourceData.new();
+	res_data.data = res;
+	res_data.ascription = item;
+	item.set_text(0, res_name);
+	item.set_metadata(0, res_data);
 	return item;
 
-func create_folder(folder_name : String, tree_item : TreeItem) -> TreeItem :
-	var item : TreeItem = tree_item.create_child();
-	item.set_metadata(COLUMN_NAME.NAME, folder_name);
-	item.set_metadata(COLUMN_NAME.TYPE, ITEM_TYPE.FOLDER);
+func create_folder(folder_name : String, ascription : TreeItem = null) -> TreeItem :
+	if (ascription != null && !ascription.get_metadata(0).is_folder) : 
+		return;
+	elif (ascription == null) : 
+		ascription = resource_tree.get_root();
+	var item : TreeItem = ascription.create_child();
+	var res_data : ResourceData = ResourceData.new();
+	res_data.ascription = item;
+	res_data.is_folder = true;
+	item.set_text(0, folder_name);
+	item.set_metadata(0, res_data);
 	item.collapsed = true;
 	return item;
 
@@ -101,7 +104,6 @@ func foreach_tree(callable : Callable, root : TreeItem = null) :
 			continue;
 		callable.callv([item]);
 
-
 func find_item_to_dir(path : String) -> TreeItem : 
 	var str_array : PackedStringArray = path.split("/");
 	var tree_item : TreeItem = resource_tree.get_root();
@@ -109,15 +111,10 @@ func find_item_to_dir(path : String) -> TreeItem :
 		return;
 	for file : String in str_array : 
 		var item_arr : Array[TreeItem] = tree_item.get_children();
-		var i : int = -1;
 		for item : TreeItem in item_arr : 
-			if (item.get_metadata(COLUMN_NAME.NAME) == file) : 
+			if (item.get_text(0) == file) : 
 				tree_item = item;
 				break; 
-			i += 1;
 	return tree_item;
 	# 找到一个路径下的TreeItem
-
-func get_data(item : TreeItem) : 
-	return item.get_metadata(COLUMN_NAME.DATA);
 

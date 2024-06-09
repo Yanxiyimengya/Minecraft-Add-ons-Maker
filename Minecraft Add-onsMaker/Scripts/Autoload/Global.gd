@@ -5,8 +5,14 @@ const VERSION : String = "2024.6 - Alpha";
 const DEFAULT_PROJECT_NAME : String = "My Add-ons";
 const CONFIG_DIR : String = "user://";
 
-var cache : EditorConfig = EditorConfig.new();
+enum ASSET_TYPE {
+	NULL,
+	FOLDER,
+	
+	TEXTURE,
+}
 
+var cache : EditorConfig = EditorConfig.new();
 
 func cmd(args : Array) :
 	var cmd_title : String = args[0];
@@ -26,9 +32,9 @@ func cmd(args : Array) :
 			var asset_dice : Dictionary = AssetManager.get_asset_items_of_dictionary();
 			for asset in asset_dice :
 				var item : TreeItem = asset_dice[asset];
-				var data : BaseMinecraftAsset = item.get_metadata(AssetManager.COLUMN_NAME.DATA);
+				var data : BaseMinecraftAsset = item.get_metadata(0).data;
 				if (data is MinecraftTextureAsset) : 
-					texture_dict[asset] = data;
+					texture_dict[asset] = data.get_texture();
 			# 遍历资产字典放入打包器
 			
 			packer.textures = texture_dict;
@@ -37,7 +43,6 @@ func cmd(args : Array) :
 		_ : 
 			return false;
 	return true;
-	pass;
 	# 由全局控制器调用特定组件功能
 
 

@@ -3,7 +3,7 @@
 [ext_resource type="Theme" uid="uid://c3gb35qykvkhd" path="res://Assets/Theme/EditorGUI.tres" id="1_cb2ps"]
 [ext_resource type="Script" path="res://addons/dockable_container/dockable_container.gd" id="2_e41y2"]
 [ext_resource type="Script" path="res://addons/dockable_container/layout_panel.gd" id="3_0yuwg"]
-[ext_resource type="Script" path="res://addons/dockable_container/layout_split.gd" id="4_ok08c"]
+[ext_resource type="Script" path="res://addons/dockable_container/layout_split.gd" id="4_pdwge"]
 [ext_resource type="Script" path="res://addons/dockable_container/layout.gd" id="5_bsi6d"]
 
 [sub_resource type="GDScript" id="GDScript_p57vs"]
@@ -16,80 +16,83 @@ func _ready() :
 	ResourceManager.load_files(ProjectManager.current_project_config.project_path);
 	file_system.reload_resource_tree();
 	
+	get_window().files_dropped.connect(_window_files_dropped);
+	
 
-
+func _window_files_dropped(files : PackedStringArray) : 
+	pass;
 "
 
 [sub_resource type="Theme" id="Theme_xcvyb"]
 HSplitContainer/constants/separation = 6
 VSplitContainer/constants/separation = 6
 
-[sub_resource type="Resource" id="Resource_s85ve"]
+[sub_resource type="Resource" id="Resource_krvj5"]
 resource_name = "Tabs"
 script = ExtResource("3_0yuwg")
 names = PackedStringArray("AssetManager")
 current_tab = 0
 
-[sub_resource type="Resource" id="Resource_k2d5f"]
+[sub_resource type="Resource" id="Resource_tvwuv"]
 resource_name = "Tabs"
 script = ExtResource("3_0yuwg")
 names = PackedStringArray("FileSystem")
 current_tab = 0
 
-[sub_resource type="Resource" id="Resource_6fm6n"]
+[sub_resource type="Resource" id="Resource_183e5"]
 resource_name = "Split"
-script = ExtResource("4_ok08c")
+script = ExtResource("4_pdwge")
 direction = 1
 percent = 0.5
-first = SubResource("Resource_s85ve")
-second = SubResource("Resource_k2d5f")
+first = SubResource("Resource_krvj5")
+second = SubResource("Resource_tvwuv")
 
-[sub_resource type="Resource" id="Resource_hckw7"]
+[sub_resource type="Resource" id="Resource_n6fy5"]
 resource_name = "Tabs"
 script = ExtResource("3_0yuwg")
 names = PackedStringArray("View")
 current_tab = 0
 
-[sub_resource type="Resource" id="Resource_2vfx2"]
+[sub_resource type="Resource" id="Resource_tl6k6"]
 resource_name = "Tabs"
 script = ExtResource("3_0yuwg")
 names = PackedStringArray("Bottom")
 current_tab = 0
 
-[sub_resource type="Resource" id="Resource_c2skr"]
+[sub_resource type="Resource" id="Resource_pxuey"]
 resource_name = "Split"
-script = ExtResource("4_ok08c")
+script = ExtResource("4_pdwge")
 direction = 1
-percent = 0.792969
-first = SubResource("Resource_hckw7")
-second = SubResource("Resource_2vfx2")
+percent = 0.785156
+first = SubResource("Resource_n6fy5")
+second = SubResource("Resource_tl6k6")
 
-[sub_resource type="Resource" id="Resource_n6fy5"]
+[sub_resource type="Resource" id="Resource_qtgxs"]
 resource_name = "Tabs"
 script = ExtResource("3_0yuwg")
 names = PackedStringArray("AttributeEditor")
 current_tab = 0
 
-[sub_resource type="Resource" id="Resource_vgen5"]
+[sub_resource type="Resource" id="Resource_tjx7x"]
 resource_name = "Split"
-script = ExtResource("4_ok08c")
+script = ExtResource("4_pdwge")
 direction = 0
-percent = 0.816121
-first = SubResource("Resource_c2skr")
-second = SubResource("Resource_n6fy5")
+percent = 0.831683
+first = SubResource("Resource_pxuey")
+second = SubResource("Resource_qtgxs")
 
-[sub_resource type="Resource" id="Resource_7dtbj"]
+[sub_resource type="Resource" id="Resource_n1b0a"]
 resource_name = "Split"
-script = ExtResource("4_ok08c")
+script = ExtResource("4_pdwge")
 direction = 0
-percent = 0.155789
-first = SubResource("Resource_6fm6n")
-second = SubResource("Resource_vgen5")
+percent = 0.122581
+first = SubResource("Resource_183e5")
+second = SubResource("Resource_tjx7x")
 
 [sub_resource type="Resource" id="Resource_n6v1n"]
 resource_name = "Layout"
 script = ExtResource("5_bsi6d")
-root = SubResource("Resource_7dtbj")
+root = SubResource("Resource_n1b0a")
 hidden_tabs = {}
 
 [sub_resource type="GDScript" id="GDScript_kk7ij"]
@@ -115,57 +118,50 @@ func _ready() :
 func reload_resource_tree() :
 	var rsmanager_root : TreeItem = ResourceManager.resource_tree.get_root();
 	var folder_queue : Array = [];
-	var file_type : ResourceManager.ITEM_TYPE;
 	var current_root : TreeItem = res_tree.get_root();
 	var children_list : Array;
 	while (true) : 
 		children_list = rsmanager_root.get_children();
 		for rs_item : TreeItem in children_list : 
-			file_type = rs_item.get_metadata(ResourceManager.COLUMN_NAME.TYPE);
-			if (file_type == ResourceManager.ITEM_TYPE.FOLDER) : 
+			if (rs_item.get_metadata(0).is_folder) : 
 				folder_queue.push_back(rs_item);
 			else : 
 				var new_item : TreeItem = current_root.create_child();
-				new_item.set_text(0, rs_item.get_metadata(ResourceManager.COLUMN_NAME.NAME));
+				new_item.set_text(0, rs_item.get_text(0));
 				new_item.set_metadata(0, rs_item);
-				match (file_type) : 
-					ResourceManager.ITEM_TYPE.TEXTURE : 
-						new_item.set_icon(0, rs_item.get_metadata(ResourceManager.COLUMN_NAME.DATA));
+				var res_data : Object = rs_item.get_metadata(0).data;
+				if (res_data is Texture) :
+					new_item.set_icon(0, res_data);
 				new_item.set_icon_max_width(0, 25);
 		if (folder_queue.is_empty()) : 
 			break;
 		rsmanager_root = folder_queue.pop_front();
 		current_root = current_root.create_child();
-		current_root.set_text(0, rsmanager_root.get_metadata(ResourceManager.COLUMN_NAME.NAME));
-
-
-
-
-
-
-
-
-
-
+		current_root.set_text(0, rsmanager_root.get_text(0));
+# 更新整个资源树
 
 
 "
 
 [sub_resource type="GDScript" id="GDScript_pm6k7"]
 script/source = "extends Container;
+@onready var attribute_container = $AttributeContainer;
 
 var target = null;
 
 const TEXTURE_EDIT = preload(\"res://Scenes/Editor/AttributeEditor/TextureEdit.tscn\")
 
 var currect_edit : Node = null;
-func update_edit() : 
+func update_edit(target) : 
+	if (currect_edit != null) : 
+		currect_edit.queue_free();
+	pass;
 	if (target is MinecraftTextureAsset) : 
 		currect_edit = TEXTURE_EDIT.instantiate();
 	
 	currect_edit.target = target;
-	add_child(currect_edit);
-	self.queue_sort();
+	attribute_container.add_child(currect_edit);
+	attribute_container.queue_sort();
 	pass;
 "
 
@@ -177,23 +173,29 @@ script/source = "extends Container;
 func _ready() : 
 	var res_root : TreeItem = asset_tree.create_item();
 	res_root.set_text(0, \"附加包资产\");
-	
-	
-	
 
-func create_texture_asset(asset : MinecraftTextureAsset, asset_name : String, target_item : TreeItem = null) -> TreeItem :
-	if (target_item == null) : 
-		target_item = asset_tree.get_root();
-		if (target_item == null) : 
-			return;
-	var tree_item : TreeItem = target_item.create_child();
-	tree_item.set_text(0, get_valid_asset_name(tree_item, asset_name));
-	tree_item.set_metadata(0, asset);
-	
-	tree_item.set_icon(0, asset.get_texture());
-	tree_item.set_icon_max_width(0, 30);
-	return tree_item;
+func create_texture_asset(asset_name : String, asset : MinecraftTextureAsset, target_item : TreeItem = null) -> TreeItem :
+	var data : TreeItem = AssetManager.append_asset_to_tree(asset_name, asset, target_item.get_metadata(0));
+	if (data != null) : 
+		var tree_item : TreeItem = target_item.create_child();
+		asset_name = get_valid_asset_name(tree_item, asset_name);
+		tree_item.set_text(0, asset_name);
+		tree_item.set_metadata(0, data);
+		
+		tree_item.set_icon(0, asset.get_texture());
+		tree_item.set_icon_max_width(0, 30);
+	return data;
 	# 创建一个纹理资产
+
+func create_folder(folder_name : String, parent : TreeItem) -> TreeItem : 
+	var item : TreeItem = AssetManager.append_folder_to_tree(folder_name, parent.get_metadata(0))
+	if (parent == null || item == null) : 
+		return;
+	var folder_item : TreeItem = parent.create_child();
+	folder_item.set_text(0, folder_name);
+	folder_item.set_metadata(0, item);
+	return folder_item;
+	# 创建一个目录文件
 
 func get_valid_asset_name(tree_item : TreeItem, asset_name : String) -> String : 
 	var result_name : String = asset_name;
@@ -219,18 +221,16 @@ func _on_add_asset_button_pressed() :
 	var select_item : TreeItem = asset_tree.get_selected();
 	if (select_item == null) : 
 		select_item = root;
-	create_texture_asset(MinecraftTextureAsset.new(), \"测试\", select_item);
 	
+	create_texture_asset(\"测试\", MinecraftTextureAsset.new(), select_item);
 	# 添加一个资产
 
 func _on_asset_tree_item_activated() : 
 	var tree_item : TreeItem = asset_tree.get_selected();
 	if (asset_tree.get_root() == tree_item) : 
 		return;
-	print(tree_item.get_text(0));
-	
-	%AttributeEditor.target = tree_item.get_metadata(0);
-	%AttributeEditor.update_edit();
+	var target = tree_item.get_metadata(0).get_metadata(0).data;
+	%AttributeEditor.update_edit(target);
 	# 在树中双击
 "
 
@@ -269,6 +269,10 @@ size_flags_vertical = 0
 [node name="HBoxContainer" type="HBoxContainer" parent="DockableContainer/View/PanelContainer"]
 layout_mode = 2
 
+[node name="Button" type="Button" parent="DockableContainer/View/PanelContainer/HBoxContainer"]
+layout_mode = 2
+text = "导出"
+
 [node name="SubViewportContainer" type="SubViewportContainer" parent="DockableContainer/View"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -276,7 +280,7 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="DockableContainer/View/SubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(788, 506)
+size = Vector2i(835, 477)
 render_target_update_mode = 4
 
 [node name="FileSystem" type="PanelContainer" parent="DockableContainer"]
@@ -291,6 +295,13 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 script = SubResource("GDScript_pm6k7")
+
+[node name="AttributeContainer" type="VBoxContainer" parent="DockableContainer/AttributeEditor"]
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="DockableContainer/AttributeEditor/AttributeContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
 
 [node name="AssetManager" type="PanelContainer" parent="DockableContainer"]
 unique_name_in_owner = true
@@ -327,5 +338,6 @@ size_flags_vertical = 3
 [node name="Bottom" type="Panel" parent="DockableContainer"]
 layout_mode = 2
 
+[connection signal="pressed" from="DockableContainer/View/PanelContainer/HBoxContainer/Button" to="DockableContainer/View" method="_on_button_pressed"]
 [connection signal="pressed" from="DockableContainer/AssetManager/VBoxContainer/MarginContainer/HBoxContainer/AddAssetButton" to="DockableContainer/AssetManager" method="_on_add_asset_button_pressed"]
 [connection signal="item_activated" from="DockableContainer/AssetManager/VBoxContainer/AssetTree" to="DockableContainer/AssetManager" method="_on_asset_tree_item_activated"]

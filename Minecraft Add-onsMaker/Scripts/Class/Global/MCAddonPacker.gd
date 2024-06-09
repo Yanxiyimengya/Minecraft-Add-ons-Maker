@@ -25,7 +25,7 @@ func pack(file_path : String) :
 	# 检测是否打资源包
 	
 	if ((pack_config.packaged_type >> 1) & 0x1 == 1) : 
-		packaged_resource_pack(zip_packer, pack_config);
+		packaged_data_pack(zip_packer, pack_config);
 	# 检测是否打行为包
 	
 	zip_packer.close();
@@ -36,7 +36,7 @@ func packaged_textures(zip_packer : ZIPPacker, tex_dict : Dictionary) :
 		if (tex_dict[emits] is Dictionary) : 
 			packaged_textures(zip_packer, tex_dict[emits]);
 		else : 
-			var data : PackedByteArray = tex_dict[emits].texture_ref.get_image().get_data();
+			var data : PackedByteArray = tex_dict[emits].get_texture().get_image().get_data();
 			zip_packer.start_file("data_pack/textures/" + emits + tex_dict[emits].name);
 			zip_packer.write_file(data);
 			zip_packer.close_file();

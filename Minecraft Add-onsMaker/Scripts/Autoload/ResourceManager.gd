@@ -118,3 +118,5 @@ func find_item_to_dir(path : String) -> TreeItem :
 	return tree_item;
 	# 找到一个路径下的TreeItem
 
+func free_resources() : 
+	resource_tree.clear();

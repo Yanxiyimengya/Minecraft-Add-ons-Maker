@@ -85,7 +85,7 @@ second = SubResource("Resource_qtgxs")
 resource_name = "Split"
 script = ExtResource("4_pdwge")
 direction = 0
-percent = 0.122581
+percent = 0.141593
 first = SubResource("Resource_183e5")
 second = SubResource("Resource_tjx7x")
 
@@ -280,7 +280,7 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="DockableContainer/View/SubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(835, 477)
+size = Vector2i(816, 477)
 render_target_update_mode = 4
 
 [node name="FileSystem" type="PanelContainer" parent="DockableContainer"]

@@ -30,8 +30,22 @@ func change_viewport_to_packed(file_path : String) -> void :
 	current_scene = scene_map[file_path];
 
 
-func _on_new_project_button_pressed():
+func _on_new_project_button_pressed() :
 	change_viewport_to_packed(NEW_PROJECT_VIEW);
 
-func _on_private_project_button_pressed():
+func _on_private_project_button_pressed() :
 	change_viewport_to_packed(RECENT_PROJECT_VIEW);
+
+func _on_import_project_button_pressed() :
+	DisplayServer.file_dialog_show("选择文件", "" , \
+			"", false, DisplayServer.FILE_DIALOG_MODE_OPEN_FILE, \
+			["config.json"], func(status : bool, selected_paths : PackedStringArray, _selected_filter_index : int):
+				if (!status) : 
+					return;
+				for path : String in selected_paths : 
+					path = path.replace("\\", "/");
+					var proj_data : EditorConfig.ProjectInfoData = Global.cache.append_project_config_form_project_config(path);
+					if (proj_data != null) : 
+						scene_map[RECENT_PROJECT_VIEW].add_project_item(proj_data);
+	); # 获取文件夹路径填入
+	pass;

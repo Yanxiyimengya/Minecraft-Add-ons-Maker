@@ -37,11 +37,6 @@ static func load_project(proj_path : String) -> PackageConfig :
 	return project;
 	# 从指定文件夹加载一个资产
 
-
-
-
-
-
 func open_project(proj : PackageConfig) : 
 	current_project_config = proj;
 	if (DirAccess.dir_exists_absolute( proj.project_path + "/res") ) : 

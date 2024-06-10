@@ -33,13 +33,31 @@ func load_config(file_path : String) :
 		
 		project_configs[project] = data;
 
-func add_project_config(project_config : PackageConfig) : 
+func append_project_config_form_project_config(path : String) -> ProjectInfoData : 
+	if (!FileAccess.file_exists(path)) : 
+		return;
+	var str : String = FileTools.load_file(path);
+	var json : Dictionary = JSON.parse_string(str);
+	if (json != null) :
+		if (project_configs.has(json.project_path)) : 
+			return;
+		var proj_data : ProjectInfoData = ProjectInfoData.new();
+		proj_data.project_name = json.project_name;
+		proj_data.project_path = json.project_path;
+		proj_data.is_favorite = false;
+		project_configs[json.project_path] = proj_data;
+		return proj_data;
+	return;
+
+func append_project_config(project_name : String, project_path : String) -> ProjectInfoData : 
+	if (project_configs.has(project_path)) : 
+		return;
 	var proj_data : ProjectInfoData = ProjectInfoData.new();
-	project_configs[project_config.project_path] = proj_data;
-	
+	proj_data.project_name = project_name;
+	proj_data.project_path = project_path;
 	proj_data.is_favorite = false;
-	proj_data.project_name = project_config.project_name;
-	proj_data.project_path = project_config.project_path;
+	project_configs[project_path] = proj_data;
+	return proj_data;
 
 func remove_project_config(project_info : ProjectInfoData) : 
 	project_configs.erase(project_info.project_path);

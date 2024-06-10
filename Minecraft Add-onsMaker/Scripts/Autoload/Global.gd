@@ -12,7 +12,7 @@ enum ASSET_TYPE {
 	TEXTURE,
 }
 
-var cache : EditorConfig = EditorConfig.new();
+@export var cache : EditorConfig = EditorConfig.new();
 
 func cmd(args : Array) :
 	var cmd_title : String = args[0];
@@ -21,7 +21,7 @@ func cmd(args : Array) :
 			var project_config : PackageConfig = PackageConfig.new();
 			project_config.project_name = args[1];
 			project_config.project_path = args[2];
-			Global.cache.add_project_config(project_config);
+			Global.cache.append_project_config(project_config.project_name, project_config.project_path);
 			return project_config;
 			
 		"ExportProject" : 
@@ -43,9 +43,6 @@ func cmd(args : Array) :
 			return false;
 	return true;
 	# 由全局控制器调用特定组件功能
-
-
-
 
 
 

@@ -99,6 +99,7 @@ func _create_project() -> PackageConfig :
 	if (use_data) : 
 		project_config.append_data_module();
 	
+	ProjectManager.save_project(project_config, project_global_path);
 	return project_config;
 "
 

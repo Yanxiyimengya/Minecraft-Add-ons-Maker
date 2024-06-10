@@ -5,17 +5,18 @@ extends Node;
 class AssetData : 
 	extends RefCounted;
 	var data : BaseMinecraftAsset = null;	# 数据
+	var path : String = "";
 	var ascription : TreeItem = null;		# 指这个资产在树中的哪个TreeItem中
 	var type : int = Global.ASSET_TYPE.NULL;	# 类型
-	
-	var is_folder : bool = false;
+	var is_folder : bool = true;;
 
 var asset_tree : Tree = Tree.new();
 # 资源树
 
 func _ready() : 
 	asset_tree.columns = 3;
-	asset_tree.create_item();
+	var root = asset_tree.create_item();
+	root.set_metadata(0, AssetData.new());
 	# 创建根节点
 
 func append_asset_to_tree(asset_name : String, asset : BaseMinecraftAsset, ascription : TreeItem = null) -> TreeItem :
@@ -29,9 +30,8 @@ func append_asset_to_tree(asset_name : String, asset : BaseMinecraftAsset, ascri
 	var data : AssetData = AssetData.new();
 	data.data = asset;
 	data.ascription = tree_item;
+	data.is_folder = false;
 	asset.name = asset_name;
-	if (asset is MinecraftTextureAsset) : 
-		data.type = Global.ASSET_TYPE.TEXTURE;
 	tree_item.set_metadata(0, data);
 	
 	return tree_item;
@@ -48,8 +48,8 @@ func append_folder_to_tree(folder_name : String, ascription : TreeItem = null) -
 	tree_item.set_text(0, folder_name);
 	var data : AssetData = AssetData.new();
 	data.ascription = tree_item;
+	data.is_folder = true;
 	tree_item.set_metadata(0, data);
-	
 	return item;
 	# 添加一个文件夹到资产树
 
@@ -84,7 +84,6 @@ func foreach_tree(callable : Callable, root : TreeItem = null) :
 		root = asset_tree.get_root();
 		if (root == null) : 
 			return;
-	
 	var childrens : Array = root.get_children();
 	for item in childrens : 
 		if (item.get_child_count() > 0) : 

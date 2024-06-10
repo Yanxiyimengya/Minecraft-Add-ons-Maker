@@ -21,20 +21,19 @@ func cmd(args : Array) :
 			var project_config : PackageConfig = PackageConfig.new();
 			project_config.project_name = args[1];
 			project_config.project_path = args[2];
-			ProjectManager.save_project(project_config, args[2]);
 			Global.cache.add_project_config(project_config);
 			return project_config;
+			
 		"ExportProject" : 
 			var packer : MCAddonPacker = MCAddonPacker.new();
 			packer.pack_config = ProjectManager.current_project_config;
-			
 			var texture_dict : Dictionary = {};
-			var asset_dice : Dictionary = AssetManager.get_asset_items_of_dictionary();
-			for asset in asset_dice :
-				var item : TreeItem = asset_dice[asset];
-				var data : BaseMinecraftAsset = item.get_metadata(0).data;
-				if (data is MinecraftTextureAsset) : 
-					texture_dict[asset] = data.get_texture();
+			var res_dice : Dictionary = TreeTools.get_child_of_dictionary(ResourceManager.resource_tree.get_root());
+			for res in res_dice :
+				var item : TreeItem = res_dice[res];
+				var data : Object = item.get_metadata(0).data;
+				if (data is MinecraftTextureResource) : 
+					texture_dict[res] = data;
 			# 遍历资产字典放入打包器
 			
 			packer.textures = texture_dict;
@@ -44,10 +43,6 @@ func cmd(args : Array) :
 			return false;
 	return true;
 	# 由全局控制器调用特定组件功能
-
-
-
-
 
 
 

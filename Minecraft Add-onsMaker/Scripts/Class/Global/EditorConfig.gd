@@ -45,7 +45,7 @@ func remove_project_config(project_info : ProjectInfoData) :
 	project_configs.erase(project_info.project_path);
 
 func save_project_config(file_path : String) : 
-	var config = ConfigFile.new();
+	var config : ConfigFile = ConfigFile.new();
 	for project : String in project_configs : 
 		config.set_value(project, "favorite", project_configs[project].get("is_favorite"));
 		config.set_value(project, "name", project_configs[project].get("project_name"));

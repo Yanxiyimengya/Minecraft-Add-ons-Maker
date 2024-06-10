@@ -2,49 +2,51 @@ extends Node;
 # 资源管理器
 # 维护一张资源树列表
 
+signal added_item(res_data : ResourceData);
+# 添加资源时会发出
+
 var resource_tree : Tree = Tree.new();
 # 资源树
 
 class ResourceData : 
 	extends RefCounted;
 	
-	var data : Resource = null;
+	var data : MinecraftBaseResource = null;
+	var path : String = "";
 	var ascription : TreeItem = null;
-	var is_folder : bool = false;
+	var is_folder : bool = true;
 
 func _ready() : 
 	resource_tree.columns = 3;
-	resource_tree.create_item().set_text(0, "资源管理器");
+	var root : TreeItem = resource_tree.create_item();
+	root.set_text(0, "资源管理器");
+	root.set_metadata(0, ResourceData.new());
 	# 创建资源树树根
 
-func load_file(file_path : String) -> Resource : 
+func load_resource(file_path : String) -> MinecraftBaseResource : 
 	if (!FileAccess.file_exists(file_path)) : 
 		return;
-	var result : Resource;
+	var result : MinecraftBaseResource;
 	var ext : String = file_path.get_extension(); # 获取文件的后缀名称
 	match(ext) : 
 		"png" : 
 			var image : Image = Image.load_from_file(file_path);
-			result = ImageTexture.create_from_image(image);
+			result = MinecraftTextureResource.new(file_path.get_file(), ImageTexture.create_from_image(image));
 		_ : 
 			return;
 	return result;
 
 func load_resource_to_apped(file_path : String, tree_path : String) : 
-	var res : Resource = load_file(file_path);
+	var res : MinecraftTextureResource = load_resource(file_path);
 	if (res == null) : 
 		return;
-	var parent_item : TreeItem = find_item_to_dir(tree_path);
+	var parent_item : TreeItem = TreeTools.find_item_to_dir(resource_tree, tree_path);
 	if (parent_item == null) : 
 		return;
 	append_resource_to_tree(file_path.get_file(), res, parent_item);
 	# 从磁盘的某个路径加载一个文件进入资源树
 
 func load_files(file_path : String, root : TreeItem = null) : 
-	if (root == null) : 
-		root = resource_tree.get_root();
-		if (root == null) : 
-			return;
 	if (!DirAccess.dir_exists_absolute(file_path)) : 
 		return;
 	
@@ -55,15 +57,15 @@ func load_files(file_path : String, root : TreeItem = null) :
 	var fname : String = dir.get_next();
 	while(!fname.is_empty()) : 
 		if (dir.current_is_dir()) : 
-			load_files(file_path+"/"+fname, create_folder(fname, root));
-		else : 
-			append_resource_to_tree(fname, load_file(file_path+"/"+fname));
 			pass;
+			load_files(file_path+"/"+fname, create_folder(fname, root) );
+		else : 
+			append_resource_to_tree(fname, load_resource(file_path+"/"+fname), root);
 		fname = dir.get_next();
 	dir.list_dir_end();
 	# 加载一个目录内的所有文件进入资源树
 
-func append_resource_to_tree(res_name : String, res : Resource, ascription : TreeItem = null) -> TreeItem : 
+func append_resource_to_tree(res_name : String, res : MinecraftBaseResource, ascription : TreeItem = null) -> TreeItem : 
 	if (ascription != null && !ascription.get_metadata(0).is_folder) : 
 		return;
 	elif (ascription == null) : 
@@ -72,8 +74,11 @@ func append_resource_to_tree(res_name : String, res : Resource, ascription : Tre
 	var res_data : ResourceData = ResourceData.new();
 	res_data.data = res;
 	res_data.ascription = item;
+	res_data.path = ascription.get_metadata(0).path + "/" + res_name;
+	res_data.is_folder = false;
 	item.set_text(0, res_name);
 	item.set_metadata(0, res_data);
+	added_item.emit(res_data);
 	return item;
 
 func create_folder(folder_name : String, ascription : TreeItem = null) -> TreeItem :
@@ -84,39 +89,13 @@ func create_folder(folder_name : String, ascription : TreeItem = null) -> TreeIt
 	var item : TreeItem = ascription.create_child();
 	var res_data : ResourceData = ResourceData.new();
 	res_data.ascription = item;
+	res_data.path = ascription.get_metadata(0).path + "/" + folder_name;
 	res_data.is_folder = true;
 	item.set_text(0, folder_name);
 	item.set_metadata(0, res_data);
 	item.collapsed = true;
+	added_item.emit(res_data);
 	return item;
-
-func foreach_tree(callable : Callable, root : TreeItem = null) : 
-	if (root == null) : 
-		root = resource_tree.get_root();
-		if (root == null) : 
-			return;
-	
-	var childrens : Array = root.get_children();
-	for item in childrens : 
-		if (item.get_child_count() > 0) : 
-			foreach_tree(callable, item);
-			callable.callv([item]);
-			continue;
-		callable.callv([item]);
-
-func find_item_to_dir(path : String) -> TreeItem : 
-	var str_array : PackedStringArray = path.split("/");
-	var tree_item : TreeItem = resource_tree.get_root();
-	if (tree_item == null) :
-		return;
-	for file : String in str_array : 
-		var item_arr : Array[TreeItem] = tree_item.get_children();
-		for item : TreeItem in item_arr : 
-			if (item.get_text(0) == file) : 
-				tree_item = item;
-				break; 
-	return tree_item;
-	# 找到一个路径下的TreeItem
 
 func free_resources() : 
 	resource_tree.clear();

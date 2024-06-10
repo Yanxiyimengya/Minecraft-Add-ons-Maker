@@ -1,4 +1,4 @@
 extends RefCounted;
-class_name BaseMinecraftAsset;
+class_name MinecraftBaseResource;
 
 var name : String = "";

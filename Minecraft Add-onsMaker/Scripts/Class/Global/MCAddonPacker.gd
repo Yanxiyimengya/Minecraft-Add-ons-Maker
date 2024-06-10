@@ -18,13 +18,13 @@ func pack(file_path : String) :
 	if (err != OK) :
 		return err;
 	
-	if (pack_config.packaged_type & 0x1 == 1) : 
+	if (pack_config.is_resource_pack) : 
 		packaged_resource_pack(zip_packer, pack_config);
 		if (!textures.is_empty()) : 
 			packaged_textures(zip_packer, textures);
 	# 检测是否打资源包
 	
-	if ((pack_config.packaged_type >> 1) & 0x1 == 1) : 
+	if (pack_config.is_data_pack) : 
 		packaged_data_pack(zip_packer, pack_config);
 	# 检测是否打行为包
 	
@@ -36,10 +36,12 @@ func packaged_textures(zip_packer : ZIPPacker, tex_dict : Dictionary) :
 		if (tex_dict[emits] is Dictionary) : 
 			packaged_textures(zip_packer, tex_dict[emits]);
 		else : 
-			var data : PackedByteArray = tex_dict[emits].get_texture().get_image().get_data();
-			zip_packer.start_file("data_pack/textures/" + emits + tex_dict[emits].name);
+			var data : PackedByteArray = tex_dict[emits].texture.get_image().save_png_to_buffer();
+			zip_packer.start_file("resource_pack/textures/" + emits);
 			zip_packer.write_file(data);
 			zip_packer.close_file();
+	# 打包资源文件
+	# 要求一个 path : Texture 的字典
 
 func packaged_icon(zip_packer : ZIPPacker, path : String) : 
 	zip_packer.start_file(path + "/pack_icon.png");

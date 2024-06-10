@@ -24,11 +24,12 @@ func _window_files_dropped(files : PackedStringArray) :
 		if (target_item == null) : 
 			target_item = file_system.res_tree.get_root();
 		for filename : String in files : 
-			var res : MinecraftBaseResource = ResourceManager.load_resource(filename);
+			var res : Resource = ResourceManager.load_resource(filename);
 			if (res == null) : 
 				continue;
 			ResourceManager.append_resource_to_tree(filename.get_file(), res, \\
 					target_item.get_metadata(0));
+	pass;
 "
 
 [sub_resource type="Theme" id="Theme_xcvyb"]
@@ -118,21 +119,6 @@ script/source = "extends Container;
 
 var drag_item : TreeItem = null;
 
-func _enter_tree() : 
-	pass;
-
-func _exit_tree() : 
-	pass;
-
-func append_resource_data(current_root : TreeItem, re_data : ResourceManager.ResourceData) : 
-	var new_item : TreeItem = current_root.create_child();
-	new_item.set_text(0, re_data.ascription.get_text(0));
-	new_item.set_metadata(0, re_data.ascription);
-	var res_data : MinecraftBaseResource = re_data.data;
-	if (res_data is MinecraftTextureResource) :
-		new_item.set_icon(0, res_data.texture);
-	new_item.set_icon_max_width(0, 25);
-
 func clear_resource_tree() :
 	res_tree.clear();
 	var res_root : TreeItem = res_tree.create_item();
@@ -151,7 +137,15 @@ func reload_resource_tree() :
 			if (rs_item.get_metadata(0).is_folder) : 
 				folder_queue.push_back([rs_item, current_root]);
 			else : 
-				append_resource_data(current_root, rs_item.get_metadata(0));
+				if (current_root.get_text_direction() rs_item.get_text(0) ) : 
+					pass;
+				var new_item : TreeItem = current_root.create_child();
+				new_item.set_text(0, rs_item.get_text(0));
+				new_item.set_metadata(0, rs_item);
+				var res_data : Object = rs_item.get_metadata(0).data;
+				if (res_data is Texture) :
+					new_item.set_icon(0, res_data);
+				new_item.set_icon_max_width(0, 25);
 		if (folder_queue.is_empty()) : 
 			break;
 		var folder_data : Array = folder_queue.pop_front();
@@ -175,6 +169,9 @@ var currect_edit : Node = null;
 func update_edit(target) : 
 	if (currect_edit != null) : 
 		currect_edit.queue_free();
+	pass;
+	if (target is MinecraftTextureAsset) : 
+		currect_edit = TEXTURE_EDIT.instantiate();
 	
 	currect_edit.target = target;
 	attribute_container.add_child(currect_edit);
@@ -190,6 +187,19 @@ script/source = "extends Container;
 func _ready() : 
 	var res_root : TreeItem = asset_tree.create_item();
 	res_root.set_text(0, \"附加包资产\");
+
+func create_texture_asset(asset_name : String, asset : MinecraftTextureAsset, target_item : TreeItem = null) -> TreeItem :
+	var data : TreeItem = AssetManager.append_asset_to_tree(asset_name, asset, target_item.get_metadata(0));
+	if (data != null) : 
+		var tree_item : TreeItem = target_item.create_child();
+		asset_name = get_valid_asset_name(tree_item, asset_name);
+		tree_item.set_text(0, asset_name);
+		tree_item.set_metadata(0, data);
+		
+		tree_item.set_icon(0, asset.get_texture());
+		tree_item.set_icon_max_width(0, 30);
+	return data;
+	# 创建一个纹理资产
 
 func create_folder(folder_name : String, parent : TreeItem) -> TreeItem : 
 	var item : TreeItem = AssetManager.append_folder_to_tree(folder_name, parent.get_metadata(0))
@@ -226,6 +236,7 @@ func _on_add_asset_button_pressed() :
 	if (select_item == null) : 
 		select_item = root;
 	
+	create_texture_asset(\"测试\", MinecraftTextureAsset.new(), select_item);
 	# 添加一个资产
 
 func _on_asset_tree_item_activated() : 

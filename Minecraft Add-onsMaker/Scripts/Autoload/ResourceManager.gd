@@ -2,7 +2,7 @@ extends Node;
 # 资源管理器
 # 维护一张资源树列表
 
-signal added_item(res_data : ResourceData);
+signal added_item(res_item : TreeItem);
 # 添加资源时会发出
 signal remove_item(res_item : TreeItem);
 # 移除资源时会发出
@@ -80,10 +80,10 @@ func append_resource_to_tree(res_name : String, res : MinecraftBaseResource, asc
 	res_data.is_folder = false;
 	item.set_text(0, res_name);
 	item.set_metadata(0, res_data);
-	added_item.emit(res_data);
+	added_item.emit(item);
 	return item;
 
-func create_folder(folder_name : String, ascription : TreeItem = null) -> TreeItem : 
+func create_folder_no_signal(folder_name : String, ascription : TreeItem = null) -> TreeItem : 
 	if (ascription != null && !ascription.get_metadata(0).is_folder) : 
 		return;
 	elif (ascription == null) : 
@@ -101,11 +101,22 @@ func create_folder(folder_name : String, ascription : TreeItem = null) -> TreeIt
 	item.set_text(0, folder_name);
 	item.set_metadata(0, res_data);
 	item.collapsed = true;
-	added_item.emit(res_data);
 	return item;
+func create_folder(folder_name : String, ascription : TreeItem = null) -> TreeItem :
+	var folder_item : TreeItem = create_folder_no_signal(folder_name, ascription);
+	added_item.emit(folder_item);
+	return folder_item;
 
-func remove_resource_item(res_item : TreeItem) : 
+func remove_resource_item(res_item : TreeItem) -> bool : 
+	if (resource_tree.get_root() == res_item) : 
+		return false;
 	var res_data : ResourceData = res_item.get_metadata(0);
 	if (res_data != null) : 
 		FileTools.remove_dir(ProjectManager.current_project_config.project_path + "/res/" + res_data.path)
 	res_item.free();
+	return true;
+
+func open_resource_in_file_manager(res_item : TreeItem) : 
+	var file_path : String = ProjectManager.current_project_config.project_path + \
+			"/res" + res_item.get_metadata(0).path;
+	OS.shell_show_in_file_manager(file_path);

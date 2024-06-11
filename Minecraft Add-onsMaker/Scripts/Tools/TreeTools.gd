@@ -7,6 +7,8 @@ static func find_item_to_dir(tree : Tree, path : String) -> TreeItem :
 	if (tree_item == null) :
 		return;
 	for file : String in str_array : 
+		if (file.is_empty()) : 
+			continue;
 		var item_arr : Array[TreeItem] = tree_item.get_children();
 		tree_item = null;
 		for item : TreeItem in item_arr : 

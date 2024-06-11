@@ -23,12 +23,19 @@ func _window_files_dropped(files : PackedStringArray) :
 		var target_item : TreeItem = file_system.res_tree.get_selected();
 		if (target_item == null) : 
 			target_item = file_system.res_tree.get_root();
-		for filename : String in files : 
-			var res : MinecraftBaseResource = ResourceManager.load_resource(filename);
-			if (res == null) : 
+		for filep : String in files : 
+			var res_path : String = ProjectManager.current_project_config.project_path + \"/res\";
+			DirAccess.copy_absolute(filep, res_path + \"/\" + filep.get_file());
+			if (DirAccess.dir_exists_absolute(filep)) : 
+				var root : TreeItem = ResourceManager.create_folder(filep.get_file(), target_item.get_metadata(0));
+				if (root != null) : 
+					ResourceManager.load_files(filep, root);
 				continue;
-			ResourceManager.append_resource_to_tree(filename.get_file(), res, \\
-					target_item.get_metadata(0));
+			var file_name : String = filep.get_file();
+			var res : MinecraftBaseResource = ResourceManager.load_resource(filep);
+			if (res != null) : 
+				ResourceManager.append_resource_to_tree(filep.get_file(), res, \\
+						target_item.get_metadata(0));
 "
 
 [sub_resource type="Theme" id="Theme_xcvyb"]
@@ -85,7 +92,7 @@ current_tab = 0
 resource_name = "Split"
 script = ExtResource("4_pdwge")
 direction = 0
-percent = 0.831683
+percent = 0.83969
 first = SubResource("Resource_pxuey")
 second = SubResource("Resource_qtgxs")
 
@@ -119,10 +126,26 @@ script/source = "extends Container;
 var drag_item : TreeItem = null;
 
 func _enter_tree() : 
-	pass;
+	ResourceManager.added_item.connect(_resource_tree_added_item);
 
 func _exit_tree() : 
-	pass;
+	ResourceManager.added_item.disconnect(_resource_tree_added_item);
+
+func _resource_tree_added_item(res_data : ResourceManager.ResourceData) :
+	if (res_data.is_folder) : 
+		var folder_parent : TreeItem = TreeTools.find_item_to_dir(res_tree, res_data.ascription.get_parent().get_metadata(0).path);
+		var folder_item : TreeItem = folder_parent.create_child();
+		folder_item.set_text(0, res_data.ascription.get_text(0));
+		return;
+	
+	var res_path : String = res_data.path; 
+	if (res_data.ascription != null) : 
+		res_path = res_data.ascription.get_parent().get_metadata(0).path;
+	else : 
+		res_path = \"\";
+	var res_item : TreeItem = TreeTools.find_item_to_dir(res_tree, res_path);
+	
+	append_resource_data(res_item, res_data);
 
 func append_resource_data(current_root : TreeItem, re_data : ResourceManager.ResourceData) : 
 	var new_item : TreeItem = current_root.create_child();
@@ -136,7 +159,7 @@ func append_resource_data(current_root : TreeItem, re_data : ResourceManager.Res
 func clear_resource_tree() :
 	res_tree.clear();
 	var res_root : TreeItem = res_tree.create_item();
-	res_root.set_text(0, \"资源\");
+	res_root.set_text(0, \"资源包资产\");
 	self.queue_sort();
 
 func reload_resource_tree() : 
@@ -283,19 +306,22 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="DockableContainer/View/SubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(816, 477)
+size = Vector2i(824, 477)
 render_target_update_mode = 4
 
 [node name="FileSystem" type="PanelContainer" parent="DockableContainer"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 script = SubResource("GDScript_ig0yg")
 
 [node name="Tree" type="Tree" parent="DockableContainer/FileSystem"]
 layout_mode = 2
+allow_rmb_select = true
 
 [node name="AttributeEditor" type="PanelContainer" parent="DockableContainer"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 script = SubResource("GDScript_pm6k7")
 
@@ -308,6 +334,7 @@ layout_mode = 2
 
 [node name="AssetManager" type="PanelContainer" parent="DockableContainer"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 script = SubResource("GDScript_3bupa")
 
@@ -339,6 +366,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Bottom" type="Panel" parent="DockableContainer"]
+custom_minimum_size = Vector2(0, 130)
 layout_mode = 2
 
 [connection signal="pressed" from="DockableContainer/View/PanelContainer/HBoxContainer/Button" to="DockableContainer/View" method="_on_button_pressed"]

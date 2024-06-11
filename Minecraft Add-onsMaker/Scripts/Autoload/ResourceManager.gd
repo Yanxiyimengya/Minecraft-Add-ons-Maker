@@ -23,6 +23,7 @@ func _ready() :
 	root.set_metadata(0, ResourceData.new());
 	# 创建资源树树根
 
+
 func load_resource(file_path : String) -> MinecraftBaseResource : 
 	if (!FileAccess.file_exists(file_path)) : 
 		return;
@@ -57,10 +58,11 @@ func load_files(file_path : String, root : TreeItem = null) :
 	var fname : String = dir.get_next();
 	while(!fname.is_empty()) : 
 		if (dir.current_is_dir()) : 
-			pass;
 			load_files(file_path+"/"+fname, create_folder(fname, root) );
 		else : 
-			append_resource_to_tree(fname, load_resource(file_path+"/"+fname), root);
+			var resource_source : MinecraftBaseResource = load_resource(file_path+"/"+fname);
+			if (resource_source != null) : 
+				append_resource_to_tree(fname, resource_source, root);
 		fname = dir.get_next();
 	dir.list_dir_end();
 	# 加载一个目录内的所有文件进入资源树
@@ -70,6 +72,11 @@ func append_resource_to_tree(res_name : String, res : MinecraftBaseResource, asc
 		return;
 	elif (ascription == null) : 
 		ascription = resource_tree.get_root();
+	for item in ascription.get_children() : 
+		if (res_name == item.get_text(0)) : 
+			return;
+		# 判断是否包含相同的 TreeItem
+		# 如果有就不执行添加操作
 	var item : TreeItem = ascription.create_child();
 	var res_data : ResourceData = ResourceData.new();
 	res_data.data = res;
@@ -81,11 +88,16 @@ func append_resource_to_tree(res_name : String, res : MinecraftBaseResource, asc
 	added_item.emit(res_data);
 	return item;
 
-func create_folder(folder_name : String, ascription : TreeItem = null) -> TreeItem :
+func create_folder(folder_name : String, ascription : TreeItem = null) -> TreeItem : 
 	if (ascription != null && !ascription.get_metadata(0).is_folder) : 
 		return;
 	elif (ascription == null) : 
 		ascription = resource_tree.get_root();
+	for item in ascription.get_children() : 
+		if (folder_name == item.get_text(0)) : 
+			return;
+		# 判断是否包含相同的 TreeItem
+		# 如果有就不执行添加操作
 	var item : TreeItem = ascription.create_child();
 	var res_data : ResourceData = ResourceData.new();
 	res_data.ascription = item;

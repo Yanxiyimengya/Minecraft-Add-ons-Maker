@@ -40,6 +40,15 @@ static func get_child_of_dictionary(root : TreeItem) -> Dictionary :
 	# 获取TreeItem清单字典
 	# path : asset_item
 
+static func get_child_of_array(tree_item : TreeItem) -> Array[TreeItem]:
+	var result : Array[TreeItem];
+	if (tree_item.get_child_count() > 0) :
+		result.append_array(tree_item.get_children());
+		for item : TreeItem in tree_item.get_children() :
+			result.append_array(TreeTools.get_child_of_array(item));
+	return result;
+	# 获取 TreeItem 清单数组
+
 static func foreach_tree(root : TreeItem, callable : Callable) : 
 	var childrens : Array = root.get_children();
 	for item in childrens : 

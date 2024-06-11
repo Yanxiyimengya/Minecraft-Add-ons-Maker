@@ -13,12 +13,16 @@ var resource_tree : Tree = Tree.new();
 class ResourceData : 
 	extends RefCounted;
 	var data : MinecraftBaseResource = null;
-	var path : String = "";
+	var path : String = "" : 
+		get : 
+			if (ascription == null) : 
+				return "";
+			return ascription.get_parent().get_metadata(0).path + "/" + ascription.get_text(0);
 	var ascription : TreeItem = null;
 	var is_folder : bool = true;
 
 func _ready() : 
-	resource_tree.columns = 3;
+	resource_tree.columns = 1;
 	var root : TreeItem = resource_tree.create_item();
 	root.set_metadata(0, ResourceData.new());
 	# 创建资源树树根
@@ -76,7 +80,6 @@ func append_resource_to_tree(res_name : String, res : MinecraftBaseResource, asc
 	var res_data : ResourceData = ResourceData.new();
 	res_data.data = res;
 	res_data.ascription = item;
-	res_data.path = ascription.get_metadata(0).path + "/" + res_name;
 	res_data.is_folder = false;
 	item.set_text(0, res_name);
 	item.set_metadata(0, res_data);
@@ -93,10 +96,10 @@ func create_folder_no_signal(folder_name : String, ascription : TreeItem = null)
 			return;
 		# 判断是否包含相同的 TreeItem
 		# 如果有就不执行添加操作
+	
 	var item : TreeItem = ascription.create_child();
 	var res_data : ResourceData = ResourceData.new();
 	res_data.ascription = item;
-	res_data.path = ascription.get_metadata(0).path + "/" + folder_name;
 	res_data.is_folder = true;
 	item.set_text(0, folder_name);
 	item.set_metadata(0, res_data);
@@ -115,6 +118,14 @@ func remove_resource_item(res_item : TreeItem) -> bool :
 		FileTools.remove_dir(ProjectManager.current_project_config.project_path + "/res/" + res_data.path)
 	res_item.free();
 	return true;
+
+func rename_resource_item(res_item : TreeItem, new_name : String) -> void : 
+	var file_path : String = ProjectManager.current_project_config.project_path + "/res" + res_item.get_metadata(0).path;
+	if (FileAccess.file_exists(file_path) || DirAccess.dir_exists_absolute(file_path)) : 
+		var parent_path : String = res_item.get_parent().get_metadata(0).path;
+		DirAccess.rename_absolute(file_path, ProjectManager.current_project_config.project_path + \
+				"/res" + parent_path + "/" + new_name);
+	res_item.set_text(0, new_name);
 
 func open_resource_in_file_manager(res_item : TreeItem) : 
 	var file_path : String = ProjectManager.current_project_config.project_path + \

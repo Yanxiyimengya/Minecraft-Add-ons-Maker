@@ -30,6 +30,8 @@ static func load_buffer(path : String) -> PackedByteArray :
 	return result;
 
 static func copy_dir(from : String, to : String) : 
+	if (from == to) : 
+		return;
 	if (DirAccess.dir_exists_absolute(from)) : 
 		var dir : DirAccess = DirAccess.open(from);
 		DirAccess.make_dir_recursive_absolute(to);
@@ -45,3 +47,18 @@ static func copy_dir(from : String, to : String) :
 			dir.list_dir_end();
 	else : 
 		DirAccess.copy_absolute(from, to);
+
+static func remove_dir(dir_path : String) : 
+	if (FileAccess.file_exists(dir_path)) : 
+		DirAccess.remove_absolute(dir_path);
+		return;
+	var dir : DirAccess = DirAccess.open(dir_path);
+	if (dir == null) :
+		return;
+	dir.list_dir_begin();
+	var file_name : String = dir.get_next();
+	while(file_name != "") :
+		remove_dir(dir_path + "/" + file_name);
+		file_name = dir.get_next();
+	dir.list_dir_end();
+	DirAccess.remove_absolute(dir_path);

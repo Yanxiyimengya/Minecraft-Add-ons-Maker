@@ -4,13 +4,14 @@ extends Node;
 
 signal added_item(res_data : ResourceData);
 # 添加资源时会发出
+signal remove_item(res_item : TreeItem);
+# 移除资源时会发出
 
 var resource_tree : Tree = Tree.new();
 # 资源树
 
 class ResourceData : 
 	extends RefCounted;
-	
 	var data : MinecraftBaseResource = null;
 	var path : String = "";
 	var ascription : TreeItem = null;
@@ -19,10 +20,8 @@ class ResourceData :
 func _ready() : 
 	resource_tree.columns = 3;
 	var root : TreeItem = resource_tree.create_item();
-	root.set_text(0, "资源管理器");
 	root.set_metadata(0, ResourceData.new());
 	# 创建资源树树根
-
 
 func load_resource(file_path : String) -> MinecraftBaseResource : 
 	if (!FileAccess.file_exists(file_path)) : 
@@ -37,20 +36,16 @@ func load_resource(file_path : String) -> MinecraftBaseResource :
 			return;
 	return result;
 
-func load_resource_to_apped(file_path : String, tree_path : String) : 
+func load_resource_to_apped(file_path : String, tree_item : TreeItem) : 
 	var res : MinecraftTextureResource = load_resource(file_path);
 	if (res == null) : 
 		return;
-	var parent_item : TreeItem = TreeTools.find_item_to_dir(resource_tree, tree_path);
-	if (parent_item == null) : 
-		return;
-	append_resource_to_tree(file_path.get_file(), res, parent_item);
+	append_resource_to_tree(file_path.get_file(), res, tree_item);
 	# 从磁盘的某个路径加载一个文件进入资源树
 
 func load_files(file_path : String, root : TreeItem = null) : 
 	if (!DirAccess.dir_exists_absolute(file_path)) : 
 		return;
-	
 	var dir : DirAccess = DirAccess.open(file_path);
 	if (dir == null) : 
 		return;
@@ -109,5 +104,8 @@ func create_folder(folder_name : String, ascription : TreeItem = null) -> TreeIt
 	added_item.emit(res_data);
 	return item;
 
-func free_resources() : 
-	resource_tree.clear();
+func remove_resource_item(res_item : TreeItem) : 
+	var res_data : ResourceData = res_item.get_metadata(0);
+	if (res_data != null) : 
+		FileTools.remove_dir(ProjectManager.current_project_config.project_path + "/res/" + res_data.path)
+	res_item.free();

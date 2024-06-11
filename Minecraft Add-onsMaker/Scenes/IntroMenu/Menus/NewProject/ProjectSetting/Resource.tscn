@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://csh8dxyn1sa3g"]
+[gd_scene load_steps=5 format=3 uid="uid://7tg5ba56102c"]
 
 [ext_resource type="FontFile" uid="uid://drraurnpg8khi" path="res://Assets/Fonts/Unifont.otf" id="1_taxa0"]
 [ext_resource type="PackedScene" uid="uid://cs0i4kt4ajatc" path="res://Scripts/Tools/LineEditExt.tscn" id="2_24myy"]
@@ -42,7 +42,7 @@ func _ready() :
 		);
 
 
-func _create_project() -> ProjectConfig : 
+func _create_project() -> PackageConfig : 
 	project_config.project_name = project_name_edit.text;
 	if (project_config.project_name.is_empty() || !project_config.project_name.is_valid_filename()) : 
 		%ProjectNameErrorLabel.text = \"为空或项目名称无效\";

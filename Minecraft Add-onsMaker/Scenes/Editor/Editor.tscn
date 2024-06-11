@@ -25,13 +25,13 @@ func _window_files_dropped(files : PackedStringArray) :
 			target_item = file_system.res_tree.get_root();
 		for filep : String in files : 
 			var res_path : String = ProjectManager.current_project_config.project_path + \"/res\";
-			DirAccess.copy_absolute(filep, res_path + \"/\" + filep.get_file());
+			var file_name : String = filep.get_file();
+			FileTools.copy_dir(filep, res_path + \"/\" + file_name);
 			if (DirAccess.dir_exists_absolute(filep)) : 
 				var root : TreeItem = ResourceManager.create_folder(filep.get_file(), target_item.get_metadata(0));
 				if (root != null) : 
 					ResourceManager.load_files(filep, root);
 				continue;
-			var file_name : String = filep.get_file();
 			var res : MinecraftBaseResource = ResourceManager.load_resource(filep);
 			if (res != null) : 
 				ResourceManager.append_resource_to_tree(filep.get_file(), res, \\
@@ -125,6 +125,16 @@ script/source = "extends Container;
 
 var drag_item : TreeItem = null;
 
+func _ready() : 
+	$FilePopupMenu.add_item(\"打开\");
+	$FilePopupMenu.add_separator(\"\");
+	$FilePopupMenu.add_item(\"展开文件夹\");
+	
+	$FolderPopupMenu.add_item(\"新建\");
+	$FolderPopupMenu.add_separator(\"\");
+	$FolderPopupMenu.add_item(\"展开文件夹\");
+	pass;
+
 func _enter_tree() : 
 	ResourceManager.added_item.connect(_resource_tree_added_item);
 
@@ -181,9 +191,30 @@ func reload_resource_tree() :
 		rsmanager_root = folder_data[0];
 		current_root = folder_data[1].create_child();
 		current_root.set_text(0, rsmanager_root.get_text(0));
+		current_root.set_metadata(0, rsmanager_root);
 # 更新整个资源树
 
+enum PorupState {
+	Folder,
+	File
+};
 
+func _on_tree_item_mouse_selected(pos : Vector2, mouse_button_index : int) : 
+	var item : TreeItem = res_tree.get_item_at_position(pos);
+	if (item == null || item == res_tree.get_root()) : 
+		return;
+	$FilePopupMenu.hide();
+	$FolderPopupMenu.hide();
+	match(mouse_button_index) : 
+		2 : 
+			var restree_item : TreeItem = item.get_metadata(0);
+			if (restree_item.get_metadata(0).is_folder) : 
+				$FolderPopupMenu.show();
+				$FolderPopupMenu.position = DisplayServer.mouse_get_position();
+			else : 
+				$FilePopupMenu.show();
+				$FilePopupMenu.position = DisplayServer.mouse_get_position();
+				# 右键触发
 "
 
 [sub_resource type="GDScript" id="GDScript_pm6k7"]
@@ -319,6 +350,10 @@ script = SubResource("GDScript_ig0yg")
 layout_mode = 2
 allow_rmb_select = true
 
+[node name="FilePopupMenu" type="PopupMenu" parent="DockableContainer/FileSystem"]
+
+[node name="FolderPopupMenu" type="PopupMenu" parent="DockableContainer/FileSystem"]
+
 [node name="AttributeEditor" type="PanelContainer" parent="DockableContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(140, 0)
@@ -370,5 +405,6 @@ custom_minimum_size = Vector2(0, 130)
 layout_mode = 2
 
 [connection signal="pressed" from="DockableContainer/View/PanelContainer/HBoxContainer/Button" to="DockableContainer/View" method="_on_button_pressed"]
+[connection signal="item_mouse_selected" from="DockableContainer/FileSystem/Tree" to="DockableContainer/FileSystem" method="_on_tree_item_mouse_selected"]
 [connection signal="pressed" from="DockableContainer/AssetManager/VBoxContainer/MarginContainer/HBoxContainer/AddAssetButton" to="DockableContainer/AssetManager" method="_on_add_asset_button_pressed"]
 [connection signal="item_activated" from="DockableContainer/AssetManager/VBoxContainer/AssetTree" to="DockableContainer/AssetManager" method="_on_asset_tree_item_activated"]

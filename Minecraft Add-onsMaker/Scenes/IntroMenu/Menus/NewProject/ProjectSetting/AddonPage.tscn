@@ -69,7 +69,7 @@ func _create_project() -> PackageConfig :
 	# 检查项目名
 	
 	if (!DirAccess.dir_exists_absolute(OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS) + \"/\" + Global.EDITOR_NAME)) : 
-		DirAccess.make_dir_absolute(OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS) + \"/\" + Global.EDITOR_NAME);
+		DirAccess.make_dir_recursive_absolute(OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS) + \"/\" + Global.EDITOR_NAME);
 	if (project_path_edit.text.is_empty() || !project_path_edit.text.is_absolute_path() || \\
 				 !DirAccess.dir_exists_absolute(get_filepath_parent(project_path_edit.text))) : 
 		%ProjectPathErrorLabel.text = \"为空或项目位置无效\";

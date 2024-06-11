@@ -14,6 +14,9 @@ enum ASSET_TYPE {
 
 @export var cache : EditorConfig = EditorConfig.new();
 
+func _ready() : 
+	pass;
+
 func cmd(args : Array) :
 	var cmd_title : String = args[0];
 	match (cmd_title) : 

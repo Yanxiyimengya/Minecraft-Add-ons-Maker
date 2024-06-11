@@ -28,3 +28,20 @@ static func load_buffer(path : String) -> PackedByteArray :
 	var result : PackedByteArray = file.get_buffer(file.get_length());
 	file.close();
 	return result;
+
+static func copy_dir(from : String, to : String) : 
+	if (DirAccess.dir_exists_absolute(from)) : 
+		var dir : DirAccess = DirAccess.open(from);
+		DirAccess.make_dir_recursive_absolute(to);
+		if (dir != null) : 
+			dir.list_dir_begin();
+			var file_name : String = dir.get_next();
+			while(file_name != "") :
+				if (dir.current_is_dir()) :
+					copy_dir(from + "/" + file_name, to + "/" + file_name);
+				else : 
+					DirAccess.copy_absolute(from + "/" + file_name, to + "/" + file_name);
+				file_name = dir.get_next();
+			dir.list_dir_end();
+	else : 
+		DirAccess.copy_absolute(from, to);

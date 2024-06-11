@@ -3,7 +3,7 @@ extends Panel;
 # 主GUI 管理
 @onready var button_bar = $VBoxContainer/PanelContainer/MarginContainer/TopBar/ButtonBar;
 @onready var version_lable = $VBoxContainer/PanelContainer/MarginContainer/TopBar/MarginContainer/VersionLable;
-@onready var menu_viewport = %MenuViewport;
+@onready var menu_viewport = %View;
 
 var button_list : Dictionary = {};
 # 这个列表存放顶部菜单按钮实例

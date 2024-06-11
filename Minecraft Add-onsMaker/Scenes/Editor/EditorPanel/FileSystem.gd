@@ -121,21 +121,6 @@ func _on_tree_item_edited() :
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 func set_porup_menu(state : PorupState) : 
 	match(state) : 
 		PorupState.File : 

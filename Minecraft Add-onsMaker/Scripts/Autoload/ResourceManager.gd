@@ -25,6 +25,7 @@ func _ready() :
 	resource_tree.columns = 1;
 	var root : TreeItem = resource_tree.create_item();
 	root.set_metadata(0, ResourceData.new());
+	root.get_metadata(0).is_folder = true;
 	# 创建资源树树根
 
 func load_resource(file_path : String) -> MinecraftBaseResource : 
@@ -118,6 +119,17 @@ func remove_resource_item(res_item : TreeItem) -> bool :
 		FileTools.remove_dir(ProjectManager.current_project_config.project_path + "/res/" + res_data.path)
 	res_item.free();
 	return true;
+
+func move_resource_item(from : TreeItem, target_itm : TreeItem) : 
+	if (!target_itm.get_metadata(0).is_folder || from == target_itm) : 
+		return;
+	var file_path : String = ProjectManager.current_project_config.project_path + "/res" + from.get_metadata(0).path;
+	var target_path : String = ProjectManager.current_project_config.project_path + "/res" + \
+			target_itm.get_metadata(0).path + "/" + from.get_text(0);
+	DirAccess.rename_absolute(file_path, target_path);
+	from.get_parent().remove_child(from);         # 先从原来的父节点删除
+	target_itm.add_child(from);                      # 添加到目标位置的TreeItem
+	
 
 func rename_resource_item(res_item : TreeItem, new_name : String) -> void : 
 	var file_path : String = ProjectManager.current_project_config.project_path + "/res" + res_item.get_metadata(0).path;

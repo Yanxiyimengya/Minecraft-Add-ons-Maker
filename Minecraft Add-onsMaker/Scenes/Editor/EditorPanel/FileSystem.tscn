@@ -5,20 +5,23 @@
 [sub_resource type="GDScript" id="GDScript_tbo45"]
 script/source = "extends Tree;
 
-func _get_drag_data(at_position):
-	if get_tree(): # 不为空
-		var sel:TreeItem = get_item_at_position(at_position)
-		if sel: # 有选中项
-			set_drag_preview(make_drag_preview(sel))
-			return [sel]
+func _get_drag_data(at_position : Vector2):
+	var sel:TreeItem = get_item_at_position(at_position);
+	if (sel) : # 有选中项
+		set_drag_preview(make_drag_preview(sel));
+		return [sel];
 
-func _can_drop_data(at_position, data):
+func _can_drop_data(at_position : Vector2, data : Variant) : 
 	# 如果拖放数据是一个TreeItem就可以放置
 	# 拖放完毕恢复拖动标志设定
-	drop_mode_flags = DROP_MODE_ON_ITEM | DROP_MODE_INBETWEEN
-	return data.size() > 0 and (data[0] is TreeItem)
+	drop_mode_flags = DROP_MODE_ON_ITEM | DROP_MODE_INBETWEEN;
+	var sel : TreeItem = get_item_at_position(at_position);
+	# && sel.get_metadata(0).get_metadata(0).is_folder
+	if ( (sel != null) ) : # 有选中项
+		return true;
+	return false;
 
-func _drop_data(at_position, data):
+func _drop_data(at_position : Vector2, data : Variant):
 	# 获取目标拖放位置，-1,0,1分别代表在某项之前、之上和之后
 	var target_pos = get_drop_section_at_position(at_position);
 	# 获取鼠标位置处的TreeItem
@@ -29,41 +32,49 @@ func _drop_data(at_position, data):
 	match (target_pos) :
 		-1: # 拖放到了某个TreeItem之前
 			# 根据是否同级进行区别处理
-			if data[0].get_parent() == target_itm.get_parent(): # 如果同级
-				data[0].move_before(target_itm)
+			if (data[0].get_parent() == target_itm.get_parent()) : # 如果同级
+				data[0].move_before(target_itm);
 			else:
-				data[0].get_parent().remove_child(data[0])         # 先从原来的父节点删除
-				target_itm.add_child(data[0])                      # 添加到目标位置的TreeItem
-				data[0].move_before(target_itm)
+				data[0].get_parent().remove_child(data[0]);         # 先从原来的父节点删除
+				target_itm.add_child(data[0]);                      # 添加到目标位置的TreeItem
+				#data[0].move_before(target_itm);
 				
-		0:  # 拖放到了某个TreeItem上
+		0:  # 拖放到了某个TreeItem上 
+			if (!target_itm.get_metadata(0).get_metadata(0).is_folder) : 
+				return;
 			data[0].get_parent().remove_child(data[0])         # 先从原来的父节点删除
 			target_itm.add_child(data[0])                      # 添加到目标位置的TreeItem
 		1: # 拖放到了某个TreeItem之后
 			# 根据是否同级进行区别处理
-			if data[0].get_parent() == target_itm.get_parent(): # 如果同级
-				data[0].move_after(target_itm)
+			if (data[0].get_parent() == target_itm.get_parent()) : # 如果同级
+				data[0].move_after(target_itm);
 			else:
-				data[0].get_parent().remove_child(data[0])         # 先从原来的父节点删除
-				target_itm.add_child(data[0])                      # 添加到目标位置的TreeItem
-				data[0].move_after(target_itm)
+				data[0].get_parent().remove_child(data[0]);         # 先从原来的父节点删除
+				target_itm.add_child(data[0]);                      # 添加到目标位置的TreeItem
+				#data[0].move_after(target_itm);
+	ResourceManager.move_resource_item(data[0].get_metadata(0), target_itm.get_metadata(0));
 
 # 创建拖动预览
-func make_drag_preview(itm:TreeItem) -> Button:
-	var btn = Button.new()
-	#btn.flat = true
-	btn.text = itm.get_text(0)
-	btn.icon = itm.get_icon(0)
-	return btn
+func make_drag_preview(itm : TreeItem) -> Button:
+	var btn = Button.new();
+	btn.expand_icon = true;
+	btn.icon = itm.get_icon(0);
+	btn.text = itm.get_text(0);
+	btn.flat = true;
+	btn.mouse_filter = Control.MOUSE_FILTER_IGNORE;
+	btn.size = Vector2(130, 30);
+	return btn;
 "
 
 [node name="FileSystem" type="PanelContainer"]
 custom_minimum_size = Vector2(150, 0)
+mouse_filter = 2
 script = ExtResource("1_bmeh1")
 
 [node name="Tree" type="Tree" parent="."]
 layout_mode = 2
 allow_rmb_select = true
+drop_mode_flags = 3
 script = SubResource("GDScript_tbo45")
 
 [node name="FilePopupMenu" type="PopupMenu" parent="."]

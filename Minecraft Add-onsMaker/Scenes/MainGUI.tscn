@@ -72,15 +72,7 @@ label_settings = SubResource("LabelSettings_bar7j")
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxLine_lgwkq")
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="VBoxContainer"]
+[node name="View" type="Control" parent="VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
-stretch = true
-
-[node name="MenuViewport" type="SubViewport" parent="VBoxContainer/SubViewportContainer"]
-unique_name_in_owner = true
-transparent_bg = true
-handle_input_locally = false
-canvas_item_default_texture_filter = 0
-size = Vector2i(1152, 613)
-render_target_update_mode = 4

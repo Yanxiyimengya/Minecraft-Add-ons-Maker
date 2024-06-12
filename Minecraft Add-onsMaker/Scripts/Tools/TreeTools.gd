@@ -41,7 +41,7 @@ static func get_child_of_dictionary(root : TreeItem) -> Dictionary :
 	# path : asset_item
 
 static func get_child_of_array(tree_item : TreeItem) -> Array[TreeItem]:
-	var result : Array[TreeItem];
+	var result : Array[TreeItem] = [];
 	if (tree_item.get_child_count() > 0) :
 		result.append_array(tree_item.get_children());
 		for item : TreeItem in tree_item.get_children() :

@@ -125,7 +125,7 @@ func _input(event: InputEvent) -> void:
 func _child_entered_tree(node: Node) -> void:
 	if node == _panel_container or node == _drag_n_drop_panel:
 		return
-	_drag_n_drop_panel.move_to_front.call_deferred()
+	#_drag_n_drop_panel.move_to_front.call_deferred()
 	_track_and_add_node(node)
 
 

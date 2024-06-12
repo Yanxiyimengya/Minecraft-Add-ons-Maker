@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=3 uid="uid://dklcjpwc357gd"]
+
+[ext_resource type="Script" path="res://Scenes/Editor/AttributeEditor/Edit/TextureEdit/TextureEdit.gd" id="1_h1hd0"]
+[ext_resource type="PackedScene" uid="uid://c2bxabh8gnkj1" path="res://Scenes/Editor/AttributeEditor/EditElement/TextureDisplay/TextureDisplay.tscn" id="2_qm371"]
+
+[node name="TextureEdit" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+script = ExtResource("1_h1hd0")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureDisplay" parent="ScrollContainer/VBoxContainer" instance=ExtResource("2_qm371")]
+unique_name_in_owner = true
+layout_mode = 2

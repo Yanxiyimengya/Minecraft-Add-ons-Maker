@@ -36,8 +36,8 @@ func load_config(file_path : String) :
 func append_project_config_form_project_config(path : String) -> ProjectInfoData : 
 	if (!FileAccess.file_exists(path)) : 
 		return;
-	var str : String = FileTools.load_file(path);
-	var json : Dictionary = JSON.parse_string(str);
+	var _str : String = FileTools.load_file(path);
+	var json : Dictionary = JSON.parse_string(_str);
 	if (json != null) :
 		if (project_configs.has(json.project_path)) : 
 			return;

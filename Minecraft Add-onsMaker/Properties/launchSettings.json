@@ -1,10 +1,10 @@
 {
   "profiles": {
-    "Minecraft Add-onsMaker": {
-      "commandName": "Executable",
-      "executablePath": "D:\\DPlant\\Godot\\Godot_v4.2.1-stable_mono_win64\\Godot_v4.2.1-stable_mono_win64.exe",
-      "commandLineArgs": "--path . > godot.log",
-      "workingDirectory": "."
-    }
+	"Minecraft Add-onsMaker": {
+	  "commandName": "Executable",
+	  "executablePath": "D:\\DPlant\\Godot\\Godot_v4.2.1-stable_mono_win64\\Godot_v4.2.1-stable_mono_win64.exe",
+	  "commandLineArgs": "--path . > godot.log",
+	  "workingDirectory": "."
+	}
   }
 }

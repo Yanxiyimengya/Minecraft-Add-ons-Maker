@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://da4h7gw2hkkq3"]
+[gd_scene load_steps=23 format=3 uid="uid://da4h7gw2hkkq3"]
 
 [ext_resource type="Theme" uid="uid://c3gb35qykvkhd" path="res://Assets/Theme/EditorGUI.tres" id="1_cb2ps"]
 [ext_resource type="Script" path="res://addons/dockable_container/dockable_container.gd" id="2_e41y2"]
@@ -10,6 +10,7 @@
 [sub_resource type="GDScript" id="GDScript_p57vs"]
 script/source = "extends Panel;
 @onready var file_system := %FileSystem;
+@onready var attribute_editor = %AttributeEditor;
 
 func _ready() : 
 	get_window().mode = Window.MODE_MAXIMIZED;
@@ -17,6 +18,11 @@ func _ready() :
 	file_system.reload_resource_tree();
 	
 	get_window().files_dropped.connect(_window_files_dropped);
+	
+	file_system.res_tree.checked_data.connect( func(data : ResourceManager.ResourceData) : 
+		if (data.data is MinecraftTextureResource) : 
+			attribute_editor.update_edit(data);
+	);
 	
 
 func _window_files_dropped(files : PackedStringArray) : 
@@ -50,19 +56,19 @@ script = ExtResource("3_0yuwg")
 names = PackedStringArray("AssetManager")
 current_tab = 0
 
-[sub_resource type="Resource" id="Resource_tvwuv"]
+[sub_resource type="Resource" id="Resource_5rgto"]
 resource_name = "Tabs"
 script = ExtResource("3_0yuwg")
 names = PackedStringArray("FileSystem")
 current_tab = 0
 
-[sub_resource type="Resource" id="Resource_183e5"]
+[sub_resource type="Resource" id="Resource_ol7cv"]
 resource_name = "Split"
 script = ExtResource("4_pdwge")
 direction = 1
 percent = 0.5
 first = SubResource("Resource_krvj5")
-second = SubResource("Resource_tvwuv")
+second = SubResource("Resource_5rgto")
 
 [sub_resource type="Resource" id="Resource_n6fy5"]
 resource_name = "Tabs"
@@ -94,7 +100,7 @@ current_tab = 0
 resource_name = "Split"
 script = ExtResource("4_pdwge")
 direction = 0
-percent = 0.83969
+percent = 0.780647
 first = SubResource("Resource_pxuey")
 second = SubResource("Resource_qtgxs")
 
@@ -103,7 +109,7 @@ resource_name = "Split"
 script = ExtResource("4_pdwge")
 direction = 0
 percent = 0.141593
-first = SubResource("Resource_183e5")
+first = SubResource("Resource_ol7cv")
 second = SubResource("Resource_tjx7x")
 
 [sub_resource type="Resource" id="Resource_n6v1n"]
@@ -120,23 +126,48 @@ func _on_button_pressed():
 	Global.cmd([\"ExportProject\", \"C:/Users/guosh/Desktop/Test.mcaddon\"]);
 "
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rwnjo"]
+
 [sub_resource type="GDScript" id="GDScript_pm6k7"]
 script/source = "extends Container;
 @onready var attribute_container = $AttributeContainer;
 
-var target = null;
+func _ready() : 
+	register_edit(MinecraftTextureResource, preload(\"res://Scenes/Editor/AttributeEditor/Edit/TextureEdit/TextureEdit.tscn\"));
 
-const TEXTURE_EDIT = preload(\"res://Scenes/Editor/AttributeEditor/TextureEdit.tscn\")
 
 var currect_edit : Node = null;
-func update_edit(target) : 
+func update_edit(_target : Variant) : 
+	open_edit(_target.data);
 	if (currect_edit != null) : 
-		currect_edit.queue_free();
-	
-	currect_edit.target = target;
-	attribute_container.add_child(currect_edit);
+		currect_edit.target = _target;
+		if (currect_edit.has_method(\"_set_target\")) : 
+			currect_edit.call(\"_set_target\");
+
+var editor_map : Dictionary = {};
+func register_edit(type : Variant, editor_scene : PackedScene) : 
+	if (editor_map.has(type) || editor_scene == null) : 
+		return;
+	var scene_inst : Node = editor_scene.instantiate();
+	attribute_container.add_child(scene_inst);
+	scene_inst.set_process(false);
+	scene_inst.visible = false;
+	editor_map[type] = scene_inst;
 	attribute_container.queue_sort();
-	pass;
+
+func open_edit(target : Variant) : 
+	if (target == null) :
+		return;
+	if (currect_edit != null) : 
+		currect_edit.visible = false;
+		currect_edit.set_process(false);
+	var previous_edit : Node = currect_edit;
+	
+	if (target is MinecraftTextureResource) : 
+		currect_edit = editor_map[MinecraftTextureResource];
+	
+	currect_edit.visible = true;
+	currect_edit.set_process(true);
 "
 
 [sub_resource type="GDScript" id="GDScript_3bupa"]
@@ -215,6 +246,12 @@ script = ExtResource("2_e41y2")
 tabs_visible = false
 layout = SubResource("Resource_n6v1n")
 
+[node name="FileSystem" parent="DockableContainer" instance=ExtResource("6_ud30c")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
 [node name="View" type="VBoxContainer" parent="DockableContainer"]
 custom_minimum_size = Vector2(540, 360)
 layout_mode = 2
@@ -240,17 +277,14 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="DockableContainer/View/SubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(824, 477)
+size = Vector2i(727, 477)
 render_target_update_mode = 4
-
-[node name="FileSystem" parent="DockableContainer" instance=ExtResource("6_ud30c")]
-unique_name_in_owner = true
-layout_mode = 2
 
 [node name="AttributeEditor" type="PanelContainer" parent="DockableContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_rwnjo")
 script = SubResource("GDScript_pm6k7")
 
 [node name="AttributeContainer" type="VBoxContainer" parent="DockableContainer/AttributeEditor"]
@@ -292,6 +326,7 @@ size_flags_horizontal = 3
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+scroll_horizontal_enabled = false
 
 [node name="Bottom" type="Panel" parent="DockableContainer"]
 custom_minimum_size = Vector2(0, 130)

@@ -1,11 +1,11 @@
 extends Object;
 class_name FileTools;
 
-static func save_file(path : String, str : String) -> void : 
+static func save_file(path : String, _str : String) -> void : 
 	var file : FileAccess = FileAccess.open(path, FileAccess.WRITE);
 	if (file == null) : 
 		return;
-	file.store_buffer(str.to_utf8_buffer());
+	file.store_buffer(_str.to_utf8_buffer());
 	file.close();
 static func save_buffer(path : String, buffer : PackedByteArray) -> void : 
 	var file : FileAccess = FileAccess.open(path, FileAccess.WRITE);

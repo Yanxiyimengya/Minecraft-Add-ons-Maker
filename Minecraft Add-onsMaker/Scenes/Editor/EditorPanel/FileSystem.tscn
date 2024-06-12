@@ -1,9 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://bduidxqriia4b"]
+[gd_scene load_steps=5 format=3 uid="uid://bduidxqriia4b"]
 
 [ext_resource type="Script" path="res://Scenes/Editor/EditorPanel/FileSystem.gd" id="1_bmeh1"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_h5ebm"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_du84n"]
+
 [sub_resource type="GDScript" id="GDScript_tbo45"]
 script/source = "extends Tree;
+
+signal checked_data(data : ResourceManager.ResourceData);
 
 func _get_drag_data(at_position : Vector2):
 	var sel:TreeItem = get_item_at_position(at_position);
@@ -11,12 +17,11 @@ func _get_drag_data(at_position : Vector2):
 		set_drag_preview(make_drag_preview(sel));
 		return [sel];
 
-func _can_drop_data(at_position : Vector2, data : Variant) : 
+func _can_drop_data(at_position : Vector2, _data : Variant) : 
 	# 如果拖放数据是一个TreeItem就可以放置
 	# 拖放完毕恢复拖动标志设定
 	drop_mode_flags = DROP_MODE_ON_ITEM | DROP_MODE_INBETWEEN;
 	var sel : TreeItem = get_item_at_position(at_position);
-	# && sel.get_metadata(0).get_metadata(0).is_folder
 	if ( (sel != null) ) : # 有选中项
 		return true;
 	return false;
@@ -29,6 +34,10 @@ func _drop_data(at_position : Vector2, data : Variant):
 	# 如果目标位置处TreeItem是data[0]的子孙节点
 	if (target_itm in TreeTools.get_child_of_array(data[0])) :
 		return; # 禁止移动
+	if (data[0].get_metadata(0).get_metadata(0).is_folder) : 
+		data[0].collapsed = true;
+		# 如果是文件夹, 就将其折叠再移动
+	
 	match (target_pos) :
 		-1: # 拖放到了某个TreeItem之前
 			# 根据是否同级进行区别处理
@@ -37,22 +46,44 @@ func _drop_data(at_position : Vector2, data : Variant):
 			else:
 				data[0].get_parent().remove_child(data[0]);         # 先从原来的父节点删除
 				target_itm.add_child(data[0]);                      # 添加到目标位置的TreeItem
-				#data[0].move_before(target_itm);
+				data[0].move_before(target_itm);
 				
 		0:  # 拖放到了某个TreeItem上 
-			if (!target_itm.get_metadata(0).get_metadata(0).is_folder) : 
-				return;
-			data[0].get_parent().remove_child(data[0])         # 先从原来的父节点删除
-			target_itm.add_child(data[0])                      # 添加到目标位置的TreeItem
+			if (target_itm.get_metadata(0).get_metadata(0).is_folder) : 
+				if (target_itm.get_parent() == target_itm) : 
+					return;
+					# 如果目标项 等于 自身所处的目录 就不执行操作
+				data[0].get_parent().remove_child(data[0])         # 先从原来的父节点删除
+				target_itm.add_child(data[0])                      # 添加到目标位置的TreeItem
+				# 是文件夹才允许拖动
 		1: # 拖放到了某个TreeItem之后
 			# 根据是否同级进行区别处理
 			if (data[0].get_parent() == target_itm.get_parent()) : # 如果同级
 				data[0].move_after(target_itm);
-			else:
+			else : 
 				data[0].get_parent().remove_child(data[0]);         # 先从原来的父节点删除
 				target_itm.add_child(data[0]);                      # 添加到目标位置的TreeItem
-				#data[0].move_after(target_itm);
+				data[0].move_before(target_itm);
 	ResourceManager.move_resource_item(data[0].get_metadata(0), target_itm.get_metadata(0));
+
+
+func _gui_input(event : InputEvent) : 
+	if (event is InputEventMouseButton && event.double_click && event.button_index == MOUSE_BUTTON_LEFT) : 
+		var selected_item : TreeItem = self.get_item_at_position(event.position);
+		if (selected_item != null) : 
+			var rs_data : ResourceManager.ResourceData = selected_item.get_metadata(0).get_metadata(0);
+			if (rs_data.is_folder) : 
+				selected_item.collapsed = !selected_item.collapsed;
+			else : 
+				checked_data.emit(rs_data);
+
+func _on_item_edited() : 
+	var edit_item : TreeItem = self.get_selected();
+	var resource_item : TreeItem = edit_item.get_metadata(0);
+	if (resource_item != null) : 
+		ResourceManager.rename_resource_item(resource_item, edit_item.get_text(0));
+		resource_item.set_text(0, edit_item.get_text(0));
+	edit_item.set_editable(0, false);
 
 # 创建拖动预览
 func make_drag_preview(itm : TreeItem) -> Button:
@@ -62,19 +93,39 @@ func make_drag_preview(itm : TreeItem) -> Button:
 	btn.text = itm.get_text(0);
 	btn.flat = true;
 	btn.mouse_filter = Control.MOUSE_FILTER_IGNORE;
-	btn.size = Vector2(130, 30);
+	btn.size = Vector2(90, 30);
 	return btn;
+
 "
 
-[node name="FileSystem" type="PanelContainer"]
-custom_minimum_size = Vector2(150, 0)
+[node name="FileSystem" type="Panel"]
+custom_minimum_size = Vector2(210, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_h5ebm")
 script = ExtResource("1_bmeh1")
 
-[node name="Tree" type="Tree" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="Tree" type="Tree" parent="MarginContainer"]
+unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_du84n")
 allow_rmb_select = true
-drop_mode_flags = 3
 script = SubResource("GDScript_tbo45")
 
 [node name="FilePopupMenu" type="PopupMenu" parent="."]
@@ -83,5 +134,5 @@ script = SubResource("GDScript_tbo45")
 
 [node name="CreateMenu" type="PopupMenu" parent="FolderPopupMenu"]
 
-[connection signal="item_edited" from="Tree" to="." method="_on_tree_item_edited"]
-[connection signal="item_mouse_selected" from="Tree" to="." method="_on_tree_item_mouse_selected"]
+[connection signal="item_edited" from="MarginContainer/Tree" to="MarginContainer/Tree" method="_on_item_edited"]
+[connection signal="item_mouse_selected" from="MarginContainer/Tree" to="." method="_on_tree_item_mouse_selected"]

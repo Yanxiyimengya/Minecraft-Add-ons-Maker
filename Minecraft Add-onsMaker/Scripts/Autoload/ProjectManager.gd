@@ -4,7 +4,7 @@ extends Node;
 var current_project_config : PackageConfig = null;
 # 当前正在编辑的项目
 
-static func save_project(project : PackageConfig, save_dir : String) : 
+func save_project(project : PackageConfig, save_dir : String) : 
 	DirAccess.make_dir_absolute(save_dir); # 创建项目目录
 	if (project.is_resource_pack) : 
 		DirAccess.make_dir_absolute(save_dir + "/res"); # 创建项目资源包目录
@@ -19,7 +19,7 @@ static func save_project(project : PackageConfig, save_dir : String) :
 	return true;
 	# 保存项目到指定路径
 
-static func load_project(proj_path : String) -> PackageConfig : 
+func load_project(proj_path : String) -> PackageConfig : 
 	if (!DirAccess.dir_exists_absolute(proj_path)) : 
 		return;
 	var project : PackageConfig =  PackageConfig.import_config(proj_path);

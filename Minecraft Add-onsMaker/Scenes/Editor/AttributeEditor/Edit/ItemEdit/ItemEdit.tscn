@@ -1,0 +1,55 @@
+[gd_scene load_steps=2 format=3 uid="uid://bgi3o02ghv0by"]
+
+[ext_resource type="Script" path="res://Scenes/Editor/AttributeEditor/Edit/ItemEdit/ItemEdit.gd" id="1_4lc85"]
+
+[node name="ItemEdit" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+script = ExtResource("1_4lc85")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="StackedByData" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/StackedByData"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/StackedByData/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "能否堆叠"
+
+[node name="StackedByDataCheckBox" type="CheckBox" parent="VBoxContainer/StackedByData/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MaxStackSizeContainer" type="HBoxContainer" parent="VBoxContainer/StackedByData"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/StackedByData/MaxStackSizeContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "最大堆叠数量"
+
+[node name="MaxStackSizeSpinBox" type="SpinBox" parent="VBoxContainer/StackedByData/MaxStackSizeContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 64.0
+value = 1.0
+
+[connection signal="pressed" from="VBoxContainer/StackedByData/HBoxContainer/StackedByDataCheckBox" to="." method="_on_stacked_by_data_check_box_pressed"]
+[connection signal="value_changed" from="VBoxContainer/StackedByData/MaxStackSizeContainer/MaxStackSizeSpinBox" to="." method="_on_max_stack_size_spin_box_value_changed"]

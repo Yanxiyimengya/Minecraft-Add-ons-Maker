@@ -7,7 +7,6 @@ var drag_item : TreeItem = null;
 func _ready() : 
 	$FilePopupMenu.add_item("打开");
 	$FilePopupMenu.add_separator("");
-	$FilePopupMenu.add_item("剪切");
 	$FilePopupMenu.add_item("复制");
 	$FilePopupMenu.add_item("重命名");
 	$FilePopupMenu.add_item("删除");
@@ -17,21 +16,12 @@ func _ready() :
 		var selected_item : TreeItem = res_tree.get_selected();
 		if (selected_item == null) : 
 			return;
-		print(id);
 		match(id) : 
-			4 : 
-				selected_item.set_editable(0, true);
-				res_tree.set_selected(selected_item, 0);
-				res_tree.edit_selected();
-				get_viewport().set_input_as_handled();
-			5 : 
-				remove_resource_item(selected_item);
-			7 : 
-				var file_path : String = ProjectManager.current_project_config.project_path + \
-						"/res" + selected_item.get_metadata(0).get_metadata(0).ascription.get_parent().get_metadata(0).path;
-				if (DirAccess.dir_exists_absolute(file_path)) : 
-					OS.shell_open(file_path);
-					
+			0 : 
+				res_tree.checked_data.emit(selected_item.get_metadata(0).get_metadata(0));
+			3 : edit_resource_item(selected_item);
+			5 : remove_resource_item(selected_item);
+			6 : ResourceManager.open_resource_in_file_manager(selected_item.get_metadata(0));
 	);
 	
 	$FolderPopupMenu.add_submenu_item("新建", "CreateMenu");
@@ -42,8 +32,8 @@ func _ready() :
 	$FolderPopupMenu.add_item("展开文件夹");
 	$FolderPopupMenu.add_item("收起文件夹");
 	$FolderPopupMenu.add_separator("");
-	$FolderPopupMenu.add_item("剪切");
-	$FolderPopupMenu.add_item("复制");
+	#$FolderPopupMenu.add_item("剪切");
+	#$FolderPopupMenu.add_item("复制");
 	$FolderPopupMenu.add_item("重命名");
 	$FolderPopupMenu.add_item("删除");
 	$FolderPopupMenu.add_separator("");
@@ -59,20 +49,20 @@ func _ready() :
 		if (selected_item == null) : 
 			return;
 		match(id) : 
-			7 : 
-				selected_item.set_editable(0, true);
-				res_tree.set_selected(selected_item, 0);
-				res_tree.edit_selected();
-				get_viewport().set_input_as_handled();
+			2 : selected_item.collapsed = false;
+			3 : selected_item.collapsed = true;
+			5 : 
+				if (selected_item != res_tree.get_root()) : 
+					edit_resource_item(selected_item);
+			6 : 
+				if (selected_item != res_tree.get_root()) : 
+					remove_resource_item(selected_item);
 			8 : 
-				remove_resource_item(selected_item);
-			10 : 
 				ResourceManager.open_resource_in_file_manager(selected_item.get_metadata(0));
 	);
 
 func _enter_tree() : 
 	ResourceManager.added_item.connect(_resource_tree_added_item);
-
 func _exit_tree() : 
 	ResourceManager.added_item.disconnect(_resource_tree_added_item);
 
@@ -84,10 +74,10 @@ func _input(event : InputEvent) :
 		# 选中项 按Delete键移除项
 	
 
-func _resource_tree_added_item(res_item : TreeItem) :
-	if (res_item == null) : 
+func _resource_tree_added_item(item : TreeItem) :
+	if (item == null) : 
 		return;
-	var res_data : ResourceManager.ResourceData = res_item.get_metadata(0);
+	var res_data : ResourceManager.ResourceData = item.get_metadata(0);
 	var res_path : String = res_data.path; 
 	if (res_data.ascription != null) : 
 		res_path = res_data.ascription.get_parent().get_metadata(0).path;
@@ -126,6 +116,12 @@ func set_porup_menu(state : PorupState) :
 			$FolderPopupMenu.show();
 			$FolderPopupMenu.position = DisplayServer.mouse_get_position();
 
+func edit_resource_item(item : TreeItem) : 
+	item.set_editable(0, true);
+	res_tree.set_selected(item, 0);
+	res_tree.edit_selected();
+	get_viewport().set_input_as_handled();
+
 func append_resource_data(current_root : TreeItem, re_data : ResourceManager.ResourceData) : 
 	var new_item : TreeItem = current_root.create_child();
 	new_item.set_text(0, re_data.ascription.get_text(0));
@@ -150,7 +146,7 @@ func create_folder(folder_name : String, current_root : TreeItem, edit : bool = 
 	if (res_folder == null) : 
 		return;
 	var folder_item : TreeItem = current_root.create_child();
-	folder_item.set_text(0, folder_name);
+	folder_item.set_text(0, res_folder.get_text(0));
 	folder_item.set_metadata(0, res_folder);
 	folder_item.set_text_overrun_behavior(0, TextServer.OVERRUN_TRIM_ELLIPSIS);
 	

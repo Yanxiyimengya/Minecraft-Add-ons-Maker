@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://da4h7gw2hkkq3"]
+[gd_scene load_steps=23 format=3 uid="uid://da4h7gw2hkkq3"]
 
 [ext_resource type="Theme" uid="uid://c3gb35qykvkhd" path="res://Assets/Theme/EditorGUI.tres" id="1_cb2ps"]
 [ext_resource type="Script" path="res://addons/dockable_container/dockable_container.gd" id="2_e41y2"]
@@ -6,12 +6,13 @@
 [ext_resource type="Script" path="res://addons/dockable_container/layout_split.gd" id="4_pdwge"]
 [ext_resource type="Script" path="res://addons/dockable_container/layout.gd" id="5_bsi6d"]
 [ext_resource type="PackedScene" uid="uid://bduidxqriia4b" path="res://Scenes/Editor/EditorPanel/FileSystem.tscn" id="6_ud30c"]
-[ext_resource type="StyleBox" uid="uid://uxe2elr0vaut" path="res://Assets/Theme/Styles/EditorPanel/EditorTitlePanel.tres" id="7_uw54b"]
+[ext_resource type="StyleBox" uid="uid://c4klq167q1awq" path="res://Assets/Theme/Styles/EditorPanel/EditorBarPanel.tres" id="7_ppg25"]
+[ext_resource type="PackedScene" uid="uid://g6o2cpumkb7i" path="res://Scenes/Editor/EditorPanel/AssetSystem.tscn" id="8_tp05k"]
 
 [sub_resource type="GDScript" id="GDScript_p57vs"]
 script/source = "extends Panel;
 @onready var file_system := %FileSystem;
-@onready var asset_manager := %AssetSystem;
+@onready var asset_system := %AssetSystem;
 
 @onready var attribute_editor := %AttributeEditor;
 
@@ -24,12 +25,23 @@ func _ready() :
 		if (data.data is MinecraftTextureResource) : 
 			attribute_editor.update_edit(data);
 	);
+	asset_system.asset_tree.checked_data.connect( func(data : AssetManager.AssetData) : 
+		if (data.data is MinecraftItemAsset) : 
+			attribute_editor.update_edit(data);
+	);
 	
 	if (!ProjectManager.current_project_config.is_data_pack) : 
 		%EditorDockable.layout.hidden_tabs[\"AssetSystem\"] = true;
 	if (!ProjectManager.current_project_config.is_resource_pack) : 
 		%EditorDockable.layout.hidden_tabs[\"FileSystem\"] = true;
-	
+
+func _input(event : InputEvent) : 
+	if (event is InputEventWithModifiers) : 
+		if (event.get_modifiers_mask() == KEY_MASK_CTRL) : 
+			if (event.is_pressed() && event.keycode == KEY_S) : 
+				var proj_cfg : PackageConfig = ProjectManager.current_project_config;
+				ProjectManager.save_project(proj_cfg, proj_cfg.project_path);
+
 
 func _window_files_dropped(files : PackedStringArray) : 
 	if (files.size() > 0) : 
@@ -141,6 +153,7 @@ script/source = "extends Container;
 
 func _ready() : 
 	register_edit(MinecraftTextureResource, preload(\"res://Scenes/Editor/AttributeEditor/Edit/TextureEdit/TextureEdit.tscn\"));
+	register_edit(MinecraftItemAsset, preload(\"res://Scenes/Editor/AttributeEditor/Edit/ItemEdit/ItemEdit.tscn\"));
 
 
 var currect_edit : Node = null;
@@ -172,67 +185,14 @@ func open_edit(target : Variant) :
 	
 	if (target is MinecraftTextureResource) : 
 		currect_edit = editor_map[MinecraftTextureResource];
+	elif (target is MinecraftItemAsset) : 
+		currect_edit = editor_map[MinecraftItemAsset];
+	else : 
+		return;
 	
 	currect_edit.visible = true;
 	currect_edit.set_process(true);
 "
-
-[sub_resource type="GDScript" id="GDScript_3bupa"]
-script/source = "extends Container;
-
-@onready var asset_tree : Tree = %AssetTree;
-
-func _ready() : 
-	var res_root : TreeItem = asset_tree.create_item();
-	res_root.set_text(0, \"附加包资产\");
-
-func create_folder(folder_name : String, parent : TreeItem) -> TreeItem : 
-	var item : TreeItem = AssetManager.append_folder_to_tree(folder_name, parent.get_metadata(0))
-	if (parent == null || item == null) : 
-		return;
-	var folder_item : TreeItem = parent.create_child();
-	folder_item.set_text(0, folder_name);
-	folder_item.set_metadata(0, item);
-	return folder_item;
-	# 创建一个目录文件
-
-func get_valid_asset_name(tree_item : TreeItem, asset_name : String) -> String : 
-	var result_name : String = asset_name;
-	var count : int = 2;
-	var exists : bool = false;
-	while(true) : 
-		exists = false;
-		for item in tree_item.get_children() : 
-			if (item.get_text(0) == tree_item.get_text(0)) : 
-				exists = true;
-				result_name = asset_name + str(count);
-				count += 1;
-				break;
-		if (!exists) : 
-			break;
-	return result_name;
-	# 如果在以一个item下面创建文件,获取有效的文件名
-
-func _on_add_asset_button_pressed() : 
-	var root : TreeItem = asset_tree.get_root();
-	if (root == null) : 
-		return;
-	var select_item : TreeItem = asset_tree.get_selected();
-	if (select_item == null) : 
-		select_item = root;
-	
-	# 添加一个资产
-
-func _on_asset_tree_item_activated() : 
-	var tree_item : TreeItem = asset_tree.get_selected();
-	if (asset_tree.get_root() == tree_item) : 
-		return;
-	var target = tree_item.get_metadata(0).get_metadata(0).data;
-	%AttributeEditor.update_edit(target);
-	# 在树中双击
-"
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3ftkk"]
 
 [node name="Editor" type="Panel"]
 anchors_preset = 15
@@ -242,6 +202,15 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_cb2ps")
 script = SubResource("GDScript_p57vs")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0941176, 0.0941176, 0.0941176, 1)
 
 [node name="EditorDockable" type="Container" parent="."]
 unique_name_in_owner = true
@@ -258,11 +227,11 @@ layout = SubResource("Resource_n6v1n")
 
 [node name="FileSystem" parent="EditorDockable" instance=ExtResource("6_ud30c")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 0)
+custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
-theme_override_styles/panel = ExtResource("7_uw54b")
+theme_override_styles/panel = ExtResource("7_ppg25")
 
 [node name="View" type="VBoxContainer" parent="EditorDockable"]
 custom_minimum_size = Vector2(540, 360)
@@ -289,14 +258,14 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="EditorDockable/View/SubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(2, 2)
+size = Vector2i(732, 477)
 render_target_update_mode = 4
 
 [node name="AttributeEditor" type="PanelContainer" parent="EditorDockable"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
-theme_override_styles/panel = ExtResource("7_uw54b")
+theme_override_styles/panel = ExtResource("7_ppg25")
 script = SubResource("GDScript_pm6k7")
 
 [node name="AttributeContainer" type="VBoxContainer" parent="EditorDockable/AttributeEditor"]
@@ -306,47 +275,13 @@ layout_mode = 2
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
-[node name="AssetSystem" type="PanelContainer" parent="EditorDockable"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 0)
-layout_mode = 2
-theme_override_styles/panel = ExtResource("7_uw54b")
-script = SubResource("GDScript_3bupa")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="EditorDockable/AssetSystem"]
-layout_mode = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="EditorDockable/AssetSystem/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 5
-theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 5
-theme_override_constants/margin_bottom = 5
-
-[node name="HBoxContainer" type="HBoxContainer" parent="EditorDockable/AssetSystem/VBoxContainer/MarginContainer"]
-layout_mode = 2
-size_flags_vertical = 0
-
-[node name="AddAssetButton" type="Button" parent="EditorDockable/AssetSystem/VBoxContainer/MarginContainer/HBoxContainer"]
-layout_mode = 2
-text = "添加"
-
-[node name="LineEdit" type="LineEdit" parent="EditorDockable/AssetSystem/VBoxContainer/MarginContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="AssetTree" type="Tree" parent="EditorDockable/AssetSystem/VBoxContainer"]
+[node name="AssetSystem" parent="EditorDockable" instance=ExtResource("8_tp05k")]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxEmpty_3ftkk")
-scroll_horizontal_enabled = false
 
 [node name="Bottom" type="Panel" parent="EditorDockable"]
 custom_minimum_size = Vector2(0, 130)
 layout_mode = 2
-theme_override_styles/panel = ExtResource("7_uw54b")
+theme_override_styles/panel = ExtResource("7_ppg25")
 
 [connection signal="pressed" from="EditorDockable/View/PanelContainer/HBoxContainer/Button" to="EditorDockable/View" method="_on_button_pressed"]
-[connection signal="pressed" from="EditorDockable/AssetSystem/VBoxContainer/MarginContainer/HBoxContainer/AddAssetButton" to="EditorDockable/AssetSystem" method="_on_add_asset_button_pressed"]
-[connection signal="item_activated" from="EditorDockable/AssetSystem/VBoxContainer/AssetTree" to="EditorDockable/AssetSystem" method="_on_asset_tree_item_activated"]

@@ -1,0 +1,257 @@
+[gd_scene load_steps=5 format=3 uid="uid://g6o2cpumkb7i"]
+
+[ext_resource type="StyleBox" uid="uid://c4klq167q1awq" path="res://Assets/Theme/Styles/EditorPanel/EditorBarPanel.tres" id="1_q2hur"]
+
+[sub_resource type="GDScript" id="GDScript_3bupa"]
+script/source = "extends Container;
+
+@onready var asset_tree : Tree = %AssetTree;
+
+func _ready() : 
+	var res_root : TreeItem = asset_tree.create_item();
+	res_root.set_text(0, \"附加包资产\");
+	res_root.set_metadata(0, AssetManager.tree.get_root());
+	
+	$FilePopupMenu.add_item(\"打开\");
+	$FilePopupMenu.add_separator(\"\");
+	$FilePopupMenu.add_item(\"重命名\");
+	$FilePopupMenu.add_item(\"删除\");
+	$FilePopupMenu.id_pressed.connect(func(id : int) : 
+		var selected_item : TreeItem = asset_tree.get_selected();
+		if (selected_item == null) : 
+			return;
+		match(id) : 
+			0 : 
+				asset_tree.checked_data.emit(selected_item.get_metadata(0).get_metadata(0));
+			2: edit_resource_item(selected_item);
+			3 : remove_asset_item(selected_item);
+	);
+	
+	$FolderPopupMenu.add_submenu_item(\"新建\", \"CreateMenu\");
+	$FolderPopupMenu/CreateMenu.add_item(\"新建物品\");
+	$FolderPopupMenu/CreateMenu.add_item(\"新建方块\");
+	$FolderPopupMenu/CreateMenu.add_item(\"文件夹\");
+	$FolderPopupMenu.add_separator(\"\");
+	$FolderPopupMenu.add_item(\"展开文件夹\");
+	$FolderPopupMenu.add_item(\"收起文件夹\");
+	$FolderPopupMenu.add_separator(\"\");
+	$FolderPopupMenu.add_item(\"重命名\");
+	$FolderPopupMenu.add_item(\"删除\");
+	$FolderPopupMenu/CreateMenu.id_pressed.connect(func(id : int) : 
+		var selected_item : TreeItem = asset_tree.get_selected();
+		match(id) : 
+			0 : create_new_item(\"new item\", selected_item);
+			2 : create_folder(\"new folder\", selected_item, true);
+	);
+	$FolderPopupMenu.id_pressed.connect(func(id : int) : 
+		var selected_item : TreeItem = asset_tree.get_selected();
+		if (selected_item == null) : 
+			return;
+		match(id) : 
+			2 : selected_item.collapsed = false;
+			3 : selected_item.collapsed = true;
+			5 : edit_resource_item(selected_item);
+			6 : remove_asset_item(selected_item);
+	);
+
+func _enter_tree() : 
+	AssetManager.added_item.connect(_asset_tree_added_item);
+func _exit_tree() : 
+	AssetManager.added_item.disconnect(_asset_tree_added_item);
+
+func _asset_tree_added_item(item : TreeItem) : 
+	if (item == null) : 
+		return;
+	var item_name : String = item.get_text(0);
+	var data : AssetManager.AssetData = item.get_metadata(0);
+	var path : String = data.path; 
+	if (data.ascription != null) : 
+		path = data.ascription.get_parent().get_metadata(0).path;
+	
+	var parent_item : TreeItem = TreeTools.find_item_to_dir(asset_tree, path);
+	if (parent_item == null) : 
+		parent_item = asset_tree.get_root();
+	
+	if (data.is_folder) : 
+		var folder_item : TreeItem = parent_item.create_child();
+		folder_item.set_text(0, item_name);
+		folder_item.set_metadata(0, item);
+		folder_item.set_text_overrun_behavior(0, TextServer.OVERRUN_TRIM_ELLIPSIS);
+	else : 
+		append_asset_item(TreeTools.find_item_to_dir(asset_tree, path), data);
+
+
+
+
+
+enum PorupState {
+	Folder,
+	File
+};
+func _on_asset_tree_item_mouse_selected(pos : Vector2, mouse_button_index : int) : 
+	var item : TreeItem = asset_tree.get_item_at_position(pos);
+	if (item == null) : 
+		return;
+	if (item == asset_tree.get_root()) : 
+		pass;
+	match(mouse_button_index) : 
+		2 : 
+			var restree_item : TreeItem = item.get_metadata(0);
+			if (restree_item == null) :
+				return;
+			if (restree_item.get_metadata(0).is_folder) : 
+				set_porup_menu(PorupState.Folder);
+			else : 
+				set_porup_menu(PorupState.File);
+func set_porup_menu(state : PorupState) : 
+	match(state) : 
+		PorupState.File : 
+			$FilePopupMenu.show();
+			$FolderPopupMenu.hide();
+			$FilePopupMenu.position = DisplayServer.mouse_get_position();
+		PorupState.Folder :
+			$FilePopupMenu.hide();
+			$FolderPopupMenu.show();
+			$FolderPopupMenu.position = DisplayServer.mouse_get_position();
+
+
+
+
+
+
+func create_new_item(item_name : String, current_root : TreeItem) -> TreeItem : 
+	var asset : MinecraftItemAsset = MinecraftItemAsset.new();
+	
+	var parent_item : TreeItem = AssetManager.append_asset_to_tree_no_signal(item_name, asset, current_root.get_metadata(0));
+	if (parent_item == null) : return;
+	var item : TreeItem = current_root.create_child();
+	item.set_text(0, parent_item.get_text(0));
+	item.set_metadata(0, parent_item);
+	item.set_text_overrun_behavior(0, TextServer.OVERRUN_TRIM_ELLIPSIS);
+	
+	return item;
+
+func append_asset_item(current_root : TreeItem, data : AssetManager.AssetData) -> TreeItem : 
+	var new_item : TreeItem = current_root.create_child();
+	new_item.set_text(0, data.ascription.get_text(0));
+	new_item.set_metadata(0, data.ascription);
+	var asset_data : MinecraftBaseAsset = data.data;
+	if (asset_data is MinecraftItemAsset) :
+		new_item.set_icon(0, null);
+	new_item.set_text_overrun_behavior(0, TextServer.OVERRUN_TRIM_ELLIPSIS);
+	return new_item;
+	# 从资产树中的资源数据加载一项进入可视资产树
+
+func create_folder(folder_name : String, current_root : TreeItem, edit : bool = false) -> TreeItem : 
+	var res_folder : TreeItem = AssetManager.create_folder_no_signal(folder_name, current_root.get_metadata(0));
+	if (res_folder == null) : return;
+	var folder_item : TreeItem = current_root.create_child();
+	folder_item.set_text(0, res_folder.get_text(0));
+	folder_item.set_metadata(0, res_folder);
+	folder_item.set_text_overrun_behavior(0, TextServer.OVERRUN_TRIM_ELLIPSIS);
+	
+	if (edit) : 
+		asset_tree.set_selected(folder_item, 0);
+		asset_tree.edit_selected();
+	
+	return folder_item;
+	# 在可视资产树中创建文件夹
+
+func remove_asset_item(item : TreeItem) : 
+	var asset_tree_item : TreeItem = item.get_metadata(0);
+	if (asset_tree_item != null) : 
+		if(AssetManager.remove_tree_item(asset_tree_item)) : 
+			item.free();
+
+func edit_resource_item(item : TreeItem) : 
+	item.set_editable(0, true);
+	asset_tree.set_selected(item, 0);
+	asset_tree.edit_selected();
+	get_viewport().set_input_as_handled();
+
+
+
+
+
+
+
+
+"
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3ftkk"]
+
+[sub_resource type="GDScript" id="GDScript_hrh5t"]
+script/source = "extends Tree;
+
+signal checked_data(data : AssetManager.AssetData);
+
+func _gui_input(event : InputEvent) : 
+	if (event is InputEventMouseButton && event.double_click && event.button_index == MOUSE_BUTTON_LEFT) : 
+		var selected_item : TreeItem = self.get_item_at_position(event.position);
+		if (selected_item != null) : 
+			var data : AssetManager.AssetData = selected_item.get_metadata(0).get_metadata(0);
+			if (data.is_folder) : 
+				selected_item.collapsed = !selected_item.collapsed;
+			else : 
+				checked_data.emit(data);
+
+func _on_item_edited() : 
+	var edit_item : TreeItem = self.get_selected();
+	var item : TreeItem = edit_item.get_metadata(0);
+	if (item != null) : 
+		AssetManager.rename_tree_item(item, edit_item.get_text(0));
+		item.set_text(0, edit_item.get_text(0));
+	edit_item.set_editable(0, false);
+"
+
+[node name="AssetSystem" type="PanelContainer"]
+custom_minimum_size = Vector2(150, 150)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("1_q2hur")
+script = SubResource("GDScript_3bupa")
+metadata/_edit_use_anchors_ = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="AddAssetButton" type="Button" parent="VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "添加"
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AssetTree" type="Tree" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3ftkk")
+allow_rmb_select = true
+scroll_horizontal_enabled = false
+script = SubResource("GDScript_hrh5t")
+
+[node name="FolderPopupMenu" type="PopupMenu" parent="."]
+
+[node name="CreateMenu" type="PopupMenu" parent="FolderPopupMenu"]
+
+[node name="FilePopupMenu" type="PopupMenu" parent="."]
+size = Vector2i(28, 8)
+
+[connection signal="item_edited" from="VBoxContainer/AssetTree" to="VBoxContainer/AssetTree" method="_on_item_edited"]
+[connection signal="item_mouse_selected" from="VBoxContainer/AssetTree" to="." method="_on_asset_tree_item_mouse_selected"]

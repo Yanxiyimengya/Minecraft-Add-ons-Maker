@@ -10,12 +10,13 @@ func save_project(project : PackageConfig, save_dir : String) :
 		DirAccess.make_dir_absolute(save_dir + "/res"); # 创建项目资源包目录
 	
 	project.export_config(save_dir);
+	AssetManager.save_asset_tree();
 	
+	var icon_dir : String = save_dir + "/icon.png";
 	var project_image : Image = project.project_icon.get_image();
 	if (project_image != null) : 
-		project_image.save_png(save_dir + "/icon.png");
+		project_image.save_png(icon_dir);
 	# 保存icon
-	
 	return true;
 	# 保存项目到指定路径
 
@@ -33,14 +34,15 @@ func load_project(proj_path : String) -> PackageConfig :
 	
 	if (project.is_resource_pack && DirAccess.dir_exists_absolute(proj_path + "/res")) : 
 		pass; 
-	
 	return project;
-	# 从指定文件夹加载一个资产
+	# 从指定文件夹加载一个项目
 
 func open_project(proj : PackageConfig) : 
 	current_project_config = proj;
+	MainGUI.change_scene_to_file("res://Scenes/Editor/Editor.tscn");
 	if (DirAccess.dir_exists_absolute( proj.project_path + "/res") ) : 
 		ResourceManager.load_files(proj.project_path + "/res");
-	MainGUI.change_scene_to_file("res://Scenes/Editor/Editor.tscn");
-	# 从PackageConfig中加载资产
+		AssetManager.load_asset_tree(proj.project_path + "/" + Global.ASSET_CONFIG_FILE);
+	
+	# 从PackageConfig中打开项目
 

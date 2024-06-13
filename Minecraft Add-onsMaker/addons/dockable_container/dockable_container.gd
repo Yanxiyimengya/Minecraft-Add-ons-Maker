@@ -1,6 +1,6 @@
 @tool
-class_name DockableContainer
-extends Container
+class_name DockableContainer;
+extends Container;
 
 const SplitHandle := preload("split_handle.gd");
 const DockablePanel := preload("dockable_panel.gd");
@@ -8,135 +8,135 @@ const DragNDropPanel := preload("drag_n_drop_panel.gd");
 
 @export var tab_alignment := TabBar.ALIGNMENT_CENTER :
 	get :
-		return _tab_align
+		return _tab_align;
 	set(value) :
-		_tab_align = value
+		_tab_align = value;
 		for i in range(1, _panel_container.get_child_count()):
 			var panel := _panel_container.get_child(i) as DockablePanel
-			panel.tab_alignment = value
-@export var use_hidden_tabs_for_min_size := false:
-	get:
-		return _use_hidden_tabs_for_min_size
-	set(value):
-		_use_hidden_tabs_for_min_size = value
-		for i in range(1, _panel_container.get_child_count()):
-			var panel := _panel_container.get_child(i) as DockablePanel
-			panel.use_hidden_tabs_for_min_size = value
+			panel.tab_alignment = value;
+@export var use_hidden_tabs_for_min_size := false :
+	get :
+		return _use_hidden_tabs_for_min_size;
+	set(value) :
+		_use_hidden_tabs_for_min_size = value;
+		for i in range(1, _panel_container.get_child_count()) :
+			var panel := _panel_container.get_child(i) as DockablePanel;
+			panel.use_hidden_tabs_for_min_size = value;
 @export var tabs_visible := true:
-	get:
-		return _tabs_visible
-	set(value):
-		_tabs_visible = value
-		for i in range(1, _panel_container.get_child_count()):
-			var panel := _panel_container.get_child(i) as DockablePanel
-			panel.show_tabs = _tabs_visible
+	get :
+		return _tabs_visible;
+	set(value) :
+		_tabs_visible = value;
+		for i in range(1, _panel_container.get_child_count()) :
+			var panel := _panel_container.get_child(i) as DockablePanel;
+			panel.show_tabs = _tabs_visible;
 ## If [code]true[/code] and a panel only has one tab, it keeps that tab hidden even if
 ## [member tabs_visible] is [code]true[/code].
 ## Only takes effect is [member tabs_visible] is [code]true[/code].
-@export var hide_single_tab := false:
-	get:
-		return _hide_single_tab
-	set(value):
-		_hide_single_tab = value
-		for i in range(1, _panel_container.get_child_count()):
-			var panel := _panel_container.get_child(i) as DockablePanel
-			panel.hide_single_tab = _hide_single_tab
-@export var rearrange_group := 0
-@export var layout := DockableLayout.new():
-	get:
-		return _layout
-	set(value):
-		set_layout(value)
+@export var hide_single_tab := false :
+	get :
+		return _hide_single_tab;
+	set(value) :
+		_hide_single_tab = value;
+		for i in range(1, _panel_container.get_child_count()) :
+			var panel := _panel_container.get_child(i) as DockablePanel;
+			panel.hide_single_tab = _hide_single_tab;
+@export var rearrange_group := 0;
+@export var layout := DockableLayout.new() :
+	get :
+		return _layout;
+	set(value) :
+		set_layout(value);
 ## If `clone_layout_on_ready` is true, `layout` will be cloned checked `_ready`.
 ## This is useful for leaving layout Resources untouched in case you want to
 ## restore layout to its default later.
-@export var clone_layout_on_ready := true
+@export var clone_layout_on_ready := true;
 
-var _layout := DockableLayout.new()
-var _panel_container := Container.new()
-var _split_container := Container.new()
-var _drag_n_drop_panel := DragNDropPanel.new()
-var _drag_panel: DockablePanel
-var _tab_align := TabBar.ALIGNMENT_CENTER
-var _tabs_visible := true
-var _use_hidden_tabs_for_min_size := false
-var _hide_single_tab := false
-var _current_panel_index := 0
-var _current_split_index := 0
-var _children_names := {}
-var _layout_dirty := false
+var _layout := DockableLayout.new();
+var _panel_container := Container.new();
+var _split_container := Container.new();
+var _drag_n_drop_panel := DragNDropPanel.new();
+var _drag_panel: DockablePanel;
+var _tab_align := TabBar.ALIGNMENT_CENTER;
+var _tabs_visible := true;
+var _use_hidden_tabs_for_min_size := false;
+var _hide_single_tab := false;
+var _current_panel_index := 0;
+var _current_split_index := 0;
+var _children_names := {};
+var _layout_dirty := false;
 
 
-func _init() -> void:
-	child_entered_tree.connect(_child_entered_tree)
-	child_exiting_tree.connect(_child_exiting_tree)
+func _init() -> void :
+	child_entered_tree.connect(_child_entered_tree);
+	child_exiting_tree.connect(_child_exiting_tree);
 
 
 func _ready() -> void:
 	set_process_input(false);
-	_panel_container.name = "_panel_container"
-	add_child(_panel_container)
+	_panel_container.name = "_panel_container";
+	add_child(_panel_container);
 	move_child(_panel_container, 0);
-	_split_container.name = "_split_container"
-	_split_container.mouse_filter = MOUSE_FILTER_PASS
-	_panel_container.add_child(_split_container)
+	_split_container.name = "_split_container";
+	_split_container.mouse_filter = MOUSE_FILTER_PASS;
+	_panel_container.add_child(_split_container);
 
-	_drag_n_drop_panel.name = "_drag_n_drop_panel"
-	_drag_n_drop_panel.mouse_filter = MOUSE_FILTER_PASS
-	_drag_n_drop_panel.visible = false
-	add_child(_drag_n_drop_panel)
+	_drag_n_drop_panel.name = "_drag_n_drop_panel";
+	_drag_n_drop_panel.mouse_filter = MOUSE_FILTER_PASS;
+	_drag_n_drop_panel.visible = false;
+	add_child(_drag_n_drop_panel);
 
 	if not _layout:
-		set_layout(null)
+		set_layout(null);
 	elif clone_layout_on_ready and not Engine.is_editor_hint():
-		set_layout(_layout.clone())
+		set_layout(_layout.clone());
 
 
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_SORT_CHILDREN:
+func _notification(what: int) -> void :
+	if what == NOTIFICATION_SORT_CHILDREN :
 		_resort();
 	elif (
 		what == NOTIFICATION_DRAG_BEGIN
 		and _can_handle_drag_data(get_viewport().gui_get_drag_data())
 	):
 		_drag_n_drop_panel.set_enabled(true, not _layout.root.is_empty())
-		set_process_input(true)
-	elif what == NOTIFICATION_DRAG_END:
-		_drag_n_drop_panel.set_enabled(false)
-		set_process_input(false)
+		set_process_input(true);
+	elif what == NOTIFICATION_DRAG_END :
+		_drag_n_drop_panel.set_enabled(false);
+		set_process_input(false);
 
 
 func _input(event: InputEvent) -> void:
 	assert(get_viewport().gui_is_dragging(), "FIXME: should only be called when dragging")
-	if event is InputEventMouseMotion:
-		var local_position := get_local_mouse_position()
-		var panel: DockablePanel
+	if event is InputEventMouseMotion :
+		var local_position := get_local_mouse_position();
+		var panel: DockablePanel;
 		for i in range(1, _panel_container.get_child_count()):
-			var p := _panel_container.get_child(i) as DockablePanel
-			if p.get_rect().has_point(local_position):
-				panel = p
-				break
-		_drag_panel = panel
-		if not panel:
-			return
-		fit_child_in_rect(_drag_n_drop_panel, panel.get_child_rect())
+			var p := _panel_container.get_child(i) as DockablePanel;
+			if p.get_rect().has_point(local_position) :
+				panel = p;
+				break;
+		_drag_panel = panel;
+		if not panel :
+			return;
+		fit_child_in_rect(_drag_n_drop_panel, panel.get_child_rect());
 
 
-func _child_entered_tree(node: Node) -> void:
-	if node == _panel_container or node == _drag_n_drop_panel:
-		return
+func _child_entered_tree(node: Node) -> void :
+	if node == _panel_container or node == _drag_n_drop_panel :
+		return;
 	#_drag_n_drop_panel.move_to_front.call_deferred()
-	_track_and_add_node(node)
+	_track_and_add_node(node);
 
 
-func _child_exiting_tree(node: Node) -> void:
-	if node == _panel_container or node == _drag_n_drop_panel:
-		return
-	_untrack_node(node)
+func _child_exiting_tree(node: Node) -> void :
+	if node == _panel_container or node == _drag_n_drop_panel :
+		return;
+	_untrack_node(node);
 
 
-func _can_drop_data(_position: Vector2, data) -> bool:
-	return _can_handle_drag_data(data)
+func _can_drop_data(_position: Vector2, data) -> bool :
+	return _can_handle_drag_data(data);
 
 
 func _drop_data(_position: Vector2, data) -> void:

@@ -5,12 +5,9 @@ const VERSION : String = "2024.6 - Alpha";
 const DEFAULT_PROJECT_NAME : String = "My Add-ons";
 const CONFIG_DIR : String = "user://";
 
-enum ASSET_TYPE {
-	NULL,
-	FOLDER,
-	
-	TEXTURE,
-}
+const ASSET_CONFIG_FILE : String = "assets.cfg";
+
+const ASSET_MC_ITEM : String = "mincraft-item";
 
 @export var cache : EditorConfig = EditorConfig.new();
 
@@ -32,21 +29,29 @@ func cmd(args : Array) :
 			packer.pack_config = ProjectManager.current_project_config;
 			var texture_dict : Dictionary = {};
 			var res_dice : Dictionary = TreeTools.get_child_of_dictionary(ResourceManager.resource_tree.get_root());
-			for res in res_dice :
-				var item : TreeItem = res_dice[res];
+			for res_path in res_dice :
+				var item : TreeItem = res_dice[res_path];
 				var data : Object = item.get_metadata(0).data;
 				if (data is MinecraftTextureResource) : 
-					texture_dict[res] = data;
+					texture_dict[res_path] = data;
+			# 遍历资源字典放入打包器
+			var assets_dict : Dictionary = TreeTools.get_child_of_dictionary(AssetManager.tree.get_root());
+			var item_dict : Dictionary = {};
+			for asset_path in assets_dict : 
+				var item : TreeItem = assets_dict[asset_path];
+				var data : Object = item.get_metadata(0).data;
+				if (data is MinecraftItemAsset) : 
+					item_dict[asset_path] = data;
 			# 遍历资产字典放入打包器
 			
 			packer.textures = texture_dict;
+			packer.items = item_dict;
 			
 			packer.pack(args[1]);
 		_ : 
 			return false;
 	return true;
 	# 由全局控制器调用特定组件功能
-
 
 
 func string_placeholder(_str : String, format = "{_}") -> String : 

@@ -40,7 +40,10 @@ var pack_bind : bool = false;
 var packaged_type : int = PackedType.Resource | PackedType.Data;
 # 项目类型
 
-
+var use_new_item_api : bool = false : 
+	get :
+		return min_engine_version[1] >= 20 && min_engine_version[0] > 1;
+# 一个属性接口 只读 返回是否使用新版物品API
 
 var is_resource_pack : bool = false : 
 	get : 

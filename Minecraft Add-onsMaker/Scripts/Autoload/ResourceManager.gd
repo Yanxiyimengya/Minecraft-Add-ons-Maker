@@ -24,8 +24,9 @@ class ResourceData :
 func _ready() : 
 	resource_tree.columns = 1;
 	var root : TreeItem = resource_tree.create_item();
-	root.set_metadata(0, ResourceData.new());
-	root.get_metadata(0).is_folder = true;
+	var data : ResourceData = ResourceData.new();
+	data.is_folder = true;
+	root.set_metadata(0, data);
 	# 创建资源树树根
 
 func load_resource(file_path : String) -> MinecraftBaseResource : 
@@ -92,11 +93,7 @@ func create_folder_no_signal(folder_name : String, ascription : TreeItem = null)
 		return;
 	elif (ascription == null) : 
 		ascription = resource_tree.get_root();
-	for item in ascription.get_children() : 
-		if (folder_name == item.get_text(0)) : 
-			return;
-		# 判断是否包含相同的 TreeItem
-		# 如果有就不执行添加操作
+	folder_name = TreeTools.get_valid_itemtext(ascription, folder_name);
 	
 	var item : TreeItem = ascription.create_child();
 	var res_data : ResourceData = ResourceData.new();
@@ -129,7 +126,7 @@ func move_resource_item(from : TreeItem, target_itm : TreeItem) :
 	DirAccess.rename_absolute(file_path, target_path);
 	from.get_parent().remove_child(from);         # 先从原来的父节点删除
 	target_itm.add_child(from);                      # 添加到目标位置的TreeItem
-	
+	# 移动一个项
 
 func rename_resource_item(res_item : TreeItem, new_name : String) -> void : 
 	var file_path : String = ProjectManager.current_project_config.project_path + "/res" + res_item.get_metadata(0).path;
@@ -142,4 +139,5 @@ func rename_resource_item(res_item : TreeItem, new_name : String) -> void :
 func open_resource_in_file_manager(res_item : TreeItem) : 
 	var file_path : String = ProjectManager.current_project_config.project_path + \
 			"/res" + res_item.get_metadata(0).path;
-	OS.shell_show_in_file_manager(file_path);
+	if (DirAccess.dir_exists_absolute(file_path) || FileAccess.file_exists(file_path)) : 
+		OS.shell_show_in_file_manager(file_path);

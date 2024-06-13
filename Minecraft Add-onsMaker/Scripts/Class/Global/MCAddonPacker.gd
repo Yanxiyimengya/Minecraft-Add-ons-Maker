@@ -30,6 +30,8 @@ func pack(file_path : String) :
 	
 	if (pack_config.is_data_pack) : 
 		packaged_data_pack(zip_packer, pack_config);
+		if (!items.is_empty()) : 
+			packaged_items(zip_packer, items);
 	# 检测是否打行为包
 	
 	zip_packer.close();
@@ -47,6 +49,38 @@ func packaged_textures(zip_packer : ZIPPacker, tex_dict : Dictionary) :
 			zip_packer.close_file();
 	# 打包资源文件
 	# 要求一个 path : Texture 的字典
+
+
+func packaged_items(zip_packer : ZIPPacker, item_dict : Dictionary) : 
+	for emits in item_dict : 
+		if (item_dict[emits] is Dictionary) : 
+			packaged_items(zip_packer, item_dict[emits]);
+		else : 
+			var item_data : MinecraftItemAsset = item_dict[emits];
+			var item_json : Dictionary = {
+				"format_version" : str(pack_config.min_engine_version[0]) + "." + \
+						str(pack_config.min_engine_version[1]) + "." + \
+						str(pack_config.min_engine_version[2]),
+				"minecraft:item" : {
+					"description" : {
+						"identifier" : "test:" + item_data.name
+					}
+				}
+			};
+			var item_components : Dictionary = {};
+			item_json["minecraft:item"]["components"] = item_components;
+			
+			item_components["minecraft:hand_equipped"] = item_data.hand_equipped;
+			item_components["minecraft:stacked_by_data"] = item_data.stacked_by_data;
+			item_components["minecraft:max_stack_size"] = item_data.max_stack_size
+			item_components["minecraft:foil"] = item_data.foil;
+			if (item_data.has_damage) : 
+				item_components["minecraft:max_damage"] = item_data.max_damage;
+			
+			zip_packer.start_file("data_pack/items/" + emits + ".json");
+			zip_packer.write_file(JSON.stringify(item_json).to_utf8_buffer());
+			zip_packer.close_file();
+
 
 func packaged_icon(zip_packer : ZIPPacker, path : String) : 
 	zip_packer.start_file(path + "/pack_icon.png");
@@ -90,4 +124,3 @@ func packaged_data_pack(zip_packer : ZIPPacker, data : PackageConfig) :
 	zip_packer.write_file(JSON.stringify(packed_json).to_utf8_buffer());
 	zip_packer.close_file();
 	packaged_icon(zip_packer, "data_pack"); # 打包图标
-

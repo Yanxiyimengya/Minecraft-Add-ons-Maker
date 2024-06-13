@@ -53,16 +53,28 @@ static func foreach_tree(root : TreeItem, callable : Callable) :
 	var childrens : Array = root.get_children();
 	for item in childrens : 
 		if (item.get_child_count() > 0) : 
+			callable.callv([item]);
 			foreach_tree(item, callable);
-			callable.call();
 			continue;
-		callable.call();
+		callable.callv([item]);
 	# 对树中的所有节点调用Callable
 
-static func search_tree(text : String, item : TreeItem) -> bool : 
+static func search_tree(item : TreeItem, text : String) -> bool : 
 	var childrens : Array[TreeItem] = item.get_children();
 	for child in childrens : 
 		if (child.get_text(0) == text) : 
 			return true;
 	return false;
 
+static func get_valid_itemtext(tree_item : TreeItem, asset_name : String) -> String : 
+	var result_name : String = asset_name;
+	var count : int = 2;
+	for item in tree_item.get_children() : 
+		if (item.get_text(0) == asset_name) : 
+			result_name = asset_name + str(count);
+			count += 1;
+			break;
+	if (count <= 2) : 
+		return asset_name;
+	return result_name;
+	# 如果在以指定item下面创建项,获取有效的不冲突的文件名

@@ -17,6 +17,7 @@ func _ready() :
 		var selected_item : TreeItem = res_tree.get_selected();
 		if (selected_item == null) : 
 			return;
+		print(id);
 		match(id) : 
 			4 : 
 				selected_item.set_editable(0, true);
@@ -48,20 +49,25 @@ func _ready() :
 	$FolderPopupMenu.add_separator("");
 	$FolderPopupMenu.add_item("在文件管理器打开");
 	$FolderPopupMenu/CreateMenu.id_pressed.connect(func(id : int) : 
-		var item : TreeItem = res_tree.get_selected();
+		var selected_item : TreeItem = res_tree.get_selected();
 		match(id) : 
 			2 : 
-				create_folder("new folder", item, true);
+				create_folder("new folder", selected_item, true);
 	);
 	$FolderPopupMenu.id_pressed.connect(func(id : int) : 
-		var item : TreeItem = res_tree.get_selected();
-		if (item == null) : 
+		var selected_item : TreeItem = res_tree.get_selected();
+		if (selected_item == null) : 
 			return;
 		match(id) : 
+			7 : 
+				selected_item.set_editable(0, true);
+				res_tree.set_selected(selected_item, 0);
+				res_tree.edit_selected();
+				get_viewport().set_input_as_handled();
 			8 : 
-				remove_resource_item(item);
+				remove_resource_item(selected_item);
 			10 : 
-				ResourceManager.open_resource_in_file_manager(item.get_metadata(0));
+				ResourceManager.open_resource_in_file_manager(selected_item.get_metadata(0));
 	);
 
 func _enter_tree() : 
@@ -70,7 +76,7 @@ func _enter_tree() :
 func _exit_tree() : 
 	ResourceManager.added_item.disconnect(_resource_tree_added_item);
 
-func _gui_input(event : InputEvent) : 
+func _input(event : InputEvent) : 
 	if (event is InputEventKey && event.is_pressed() && event.keycode == KEY_DELETE) : 
 		var select_item : TreeItem = res_tree.get_selected();
 		if (select_item != null) : 

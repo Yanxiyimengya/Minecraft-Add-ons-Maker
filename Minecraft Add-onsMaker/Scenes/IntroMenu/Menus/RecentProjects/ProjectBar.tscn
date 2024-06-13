@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://c7po8n3h0ouoq" path="res://Assets/icon.png" id="1_j8f10"]
 [ext_resource type="FontFile" uid="uid://drraurnpg8khi" path="res://Assets/Fonts/Unifont.otf" id="2_6hybp"]
-[ext_resource type="PackedScene" uid="uid://cs0i4kt4ajatc" path="res://Scripts/Tools/LineEditExt.tscn" id="2_6ruq8"]
+[ext_resource type="PackedScene" uid="uid://cs0i4kt4ajatc" path="res://Scripts/LineEditExt.tscn" id="2_6ruq8"]
 [ext_resource type="FontFile" uid="uid://cin6d10brxghd" path="res://Assets/Fonts/NotoSans-Bold-5.ttf" id="2_mboc3"]
 [ext_resource type="Texture2D" uid="uid://1hmlc8gf2ewk" path="res://Assets/Images/Icons/box.png" id="3_4cu4s"]
 [ext_resource type="Texture2D" uid="uid://codtthvgaptr" path="res://Assets/Images/Icons/box_focus.png" id="4_ypvs1"]

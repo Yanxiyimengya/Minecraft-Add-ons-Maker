@@ -40,6 +40,8 @@ var pack_bind : bool = false;
 var packaged_type : int = PackedType.Resource | PackedType.Data;
 # 项目类型
 
+
+
 var is_resource_pack : bool = false : 
 	get : 
 		return (packaged_type & 0x1 == 1);

@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://csh8dxyn1sa3g"]
 
 [ext_resource type="FontFile" uid="uid://drraurnpg8khi" path="res://Assets/Fonts/Unifont.otf" id="1_taxa0"]
-[ext_resource type="PackedScene" uid="uid://cs0i4kt4ajatc" path="res://Scripts/Tools/LineEditExt.tscn" id="2_24myy"]
+[ext_resource type="PackedScene" uid="uid://cs0i4kt4ajatc" path="res://Scripts/LineEditExt.tscn" id="2_24myy"]
 
 [sub_resource type="GDScript" id="GDScript_vhfck"]
 script/source = "extends \"./BaseProjectSettingUI.gd\";

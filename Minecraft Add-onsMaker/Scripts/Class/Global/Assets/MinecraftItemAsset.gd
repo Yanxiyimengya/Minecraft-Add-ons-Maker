@@ -1,0 +1,2 @@
+extends BaseMinecraftAsset;
+class_name MinecraftItemAsset;

@@ -6,8 +6,10 @@ var pack_config : PackageConfig = null;
 
 var textures : Dictionary = {};
 # 这是打包进去的资源纹理 ,它的键是路径 值是 MinecraftTextureAsset
-# 例如 "dirt.png" : Texture2D
-
+# 例如 "dirt.png" : <Texture2D>
+var items : Dictionary = {};
+# 这是打包进去的行为包物品,它的键是路径 data_pack/items/<ItemName> 下的路径
+# 例如 "diamond_apple" : <MinecraftItemAsset>
 
 
 func pack(file_path : String) : 
@@ -22,6 +24,8 @@ func pack(file_path : String) :
 		packaged_resource_pack(zip_packer, pack_config);
 		if (!textures.is_empty()) : 
 			packaged_textures(zip_packer, textures);
+			# 如果纹理目标存在 则打包纹理
+		
 	# 检测是否打资源包
 	
 	if (pack_config.is_data_pack) : 
@@ -36,7 +40,8 @@ func packaged_textures(zip_packer : ZIPPacker, tex_dict : Dictionary) :
 		if (tex_dict[emits] is Dictionary) : 
 			packaged_textures(zip_packer, tex_dict[emits]);
 		else : 
-			var data : PackedByteArray = tex_dict[emits].texture.get_image().save_png_to_buffer();
+			var data : PackedByteArray = ImageTools.set_proportional(tex_dict[emits].texture.get_image()) \
+					.save_png_to_buffer();
 			zip_packer.start_file("resource_pack/textures/" + emits);
 			zip_packer.write_file(data);
 			zip_packer.close_file();

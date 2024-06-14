@@ -57,13 +57,15 @@ func packaged_items(zip_packer : ZIPPacker, item_dict : Dictionary) :
 			packaged_items(zip_packer, item_dict[emits]);
 		else : 
 			var item_data : MinecraftItemAsset = item_dict[emits];
+			var item_identifier : String = "test:" + item_data.id;
+			# 长ID
 			var item_json : Dictionary = {
 				"format_version" : str(pack_config.min_engine_version[0]) + "." + \
 						str(pack_config.min_engine_version[1]) + "." + \
 						str(pack_config.min_engine_version[2]),
 				"minecraft:item" : {
 					"description" : {
-						"identifier" : "test:" + item_data.name
+						"identifier" : item_identifier
 					}
 				}
 			};
@@ -80,6 +82,29 @@ func packaged_items(zip_packer : ZIPPacker, item_dict : Dictionary) :
 			zip_packer.start_file("data_pack/items/" + emits + ".json");
 			zip_packer.write_file(JSON.stringify(item_json).to_utf8_buffer());
 			zip_packer.close_file();
+			
+			if (pack_config.is_resource_pack) : 
+				if (item_data.texture != null) : 
+					if (pack_config.use_new_item_api) : 
+						pass;
+					else : 
+						var item_res_json : Dictionary = {
+							"format_version": "1.16.0",
+							"minecraft:item": {
+								"description": {
+									"identifier": item_identifier,
+									"category": "Equipment"#item_data.category
+								},
+								"components": {
+									"minecraft:icon": item_data.id
+								}
+							}
+						};
+						
+						zip_packer.start_file("resource_pack/items/" + emits + ".json");
+						zip_packer.write_file(JSON.stringify(item_res_json).to_utf8_buffer());
+						zip_packer.close_file();
+				# 打包 resource_pack/items/...json
 
 
 func packaged_icon(zip_packer : ZIPPacker, path : String) : 
@@ -107,6 +132,26 @@ func packaged_resource_pack(zip_packer : ZIPPacker, data : PackageConfig) :
 	zip_packer.write_file(JSON.stringify(packed_json).to_utf8_buffer());
 	zip_packer.close_file();
 	packaged_icon(zip_packer, "resource_pack"); # 打包图标
+	
+	if (data.is_data_pack && items.size() > 0) : 
+		var item_textures : Dictionary = {
+			"resource_pack_name": "vanilla",
+			"texture_name": "atlas.items",
+			"texture_data": {}
+		}
+		for item in items : 
+			var item_data = items[item];
+			if (item_data.texture == null) : 
+				continue;
+			var texture_path : String = item_data.texture_path;
+			var pos : int = texture_path.get_file().rfind(".");
+			texture_path = texture_path.substr(1, pos);
+			item_textures["texture_data"][item_data.id] = {"textures" : "textures/" + texture_path};
+			print(texture_path)
+		zip_packer.start_file("resource_pack/textures/item_texture.json");
+		zip_packer.write_file(JSON.stringify(item_textures).to_utf8_buffer());
+		zip_packer.close_file();
+	
 
 func packaged_data_pack(zip_packer : ZIPPacker, data : PackageConfig) : 
 	var packed_json : Dictionary = {

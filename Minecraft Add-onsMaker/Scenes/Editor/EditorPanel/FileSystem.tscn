@@ -13,58 +13,59 @@ func _get_drag_data(at_position : Vector2):
 	var sel:TreeItem = get_item_at_position(at_position);
 	if (sel) : # 有选中项
 		set_drag_preview(make_drag_preview(sel));
-		return [sel];
+		return [\"FileDrag\", sel];
 
-func _can_drop_data(at_position : Vector2, _data : Variant) : 
+func _can_drop_data(at_position : Vector2, data : Variant) : 
 	# 如果拖放数据是一个TreeItem就可以放置
 	# 拖放完毕恢复拖动标志设定
-	drop_mode_flags = DROP_MODE_ON_ITEM | DROP_MODE_INBETWEEN;
-	var sel : TreeItem = get_item_at_position(at_position);
-	if ( (sel != null) ) : # 有选中项
-		return true;
+	if (data is Array && data.size() > 1) : 
+		drop_mode_flags = DROP_MODE_ON_ITEM | DROP_MODE_INBETWEEN;
+		var sel : TreeItem = get_item_at_position(at_position);
+		if ( (sel != null) && data[0] == \"FileDrag\") : # 有选中项
+			return true;
 	return false;
 
-func _drop_data(at_position : Vector2, data : Variant):
+func _drop_data(at_position : Vector2, data : Variant) : 
 	# 获取目标拖放位置，-1,0,1分别代表在某项之前、之上和之后
 	var target_pos = get_drop_section_at_position(at_position);
 	# 获取鼠标位置处的TreeItem
 	var target_itm : TreeItem = get_item_at_position(at_position);
-	# 如果目标位置处TreeItem是data[0]的子孙节点
-	if (target_itm in TreeTools.get_child_of_array(data[0])) :
+	# 如果目标位置处TreeItem是data[1]的子孙节点
+	if (target_itm in TreeTools.get_child_of_array(data[1])) :
 		return; # 禁止移动
-	if (TreeTools.search_tree(target_itm, data[0].get_text(0))) : 
+	if (TreeTools.search_tree(target_itm, data[1].get_text(0))) : 
 		return;
-	elif (data[0].get_metadata(0).get_metadata(0).is_folder) : 
-		data[0].collapsed = true;
+	elif (data[1].get_metadata(0).get_metadata(0).is_folder) : 
+		data[1].collapsed = true;
 		# 如果是文件夹, 就将其折叠再移动
 	
 	match (target_pos) :
 		-1: # 拖放到了某个TreeItem之前
 			# 根据是否同级进行区别处理
-			if (data[0].get_parent() == target_itm.get_parent()) : # 如果同级
-				data[0].move_before(target_itm);
+			if (data[1].get_parent() == target_itm.get_parent()) : # 如果同级
+				data[1].move_before(target_itm);
 			else:
-				data[0].get_parent().remove_child(data[0]);         # 先从原来的父节点删除
-				target_itm.add_child(data[0]);                      # 添加到目标位置的TreeItem
-				data[0].move_before(target_itm);
+				data[1].get_parent().remove_child(data[1]);         # 先从原来的父节点删除
+				target_itm.add_child(data[1]);                      # 添加到目标位置的TreeItem
+				data[1].move_before(target_itm);
 				
 		0:  # 拖放到了某个TreeItem上 
 			if (target_itm.get_metadata(0).get_metadata(0).is_folder) : 
 				if (target_itm.get_parent() == target_itm) : 
 					return;
 					# 如果目标项 等于 自身所处的目录 就不执行操作
-				data[0].get_parent().remove_child(data[0])         # 先从原来的父节点删除
-				target_itm.add_child(data[0])                      # 添加到目标位置的TreeItem
+				data[1].get_parent().remove_child(data[1])         # 先从原来的父节点删除
+				target_itm.add_child(data[1])                      # 添加到目标位置的TreeItem
 				# 是文件夹才允许拖动
 		1: # 拖放到了某个TreeItem之后
 			# 根据是否同级进行区别处理
-			if (data[0].get_parent() == target_itm.get_parent()) : # 如果同级
-				data[0].move_after(target_itm);
+			if (data[1].get_parent() == target_itm.get_parent()) : # 如果同级
+				data[1].move_after(target_itm);
 			else : 
-				data[0].get_parent().remove_child(data[0]);         # 先从原来的父节点删除
-				target_itm.add_child(data[0]);                      # 添加到目标位置的TreeItem
-				data[0].move_before(target_itm);
-	ResourceManager.move_resource_item(data[0].get_metadata(0), target_itm.get_metadata(0));
+				data[1].get_parent().remove_child(data[1]);         # 先从原来的父节点删除
+				target_itm.add_child(data[1]);                      # 添加到目标位置的TreeItem
+				data[1].move_before(target_itm);
+	ResourceManager.move_resource_item(data[1].get_metadata(0), target_itm.get_metadata(0));
 
 func _gui_input(event : InputEvent) : 
 	if (event is InputEventMouseButton && event.double_click && event.button_index == MOUSE_BUTTON_LEFT) : 

@@ -10,7 +10,7 @@ func save_project(project : PackageConfig, save_dir : String) :
 		DirAccess.make_dir_absolute(save_dir + "/res"); # 创建项目资源包目录
 	
 	project.export_config(save_dir);
-	AssetManager.save_asset_tree();
+	AssetManager.save_asset_tree(save_dir + "/assets.cfg");
 	
 	var icon_dir : String = save_dir + "/icon.png";
 	var project_image : Image = project.project_icon.get_image();

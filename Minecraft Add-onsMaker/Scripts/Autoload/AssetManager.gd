@@ -105,7 +105,7 @@ func rename_tree_item(item : TreeItem, new_name : String) -> void :
 	item.set_text(0, new_name);
 
 
-func save_asset_tree() : 
+func save_asset_tree(file_path : String) : 
 	var cfg_file : ConfigFile = ConfigFile.new();
 	TreeTools.foreach_tree(tree.get_root(), func(item : TreeItem) : 
 		var section : String = item.get_metadata(0).path;
@@ -121,7 +121,7 @@ func save_asset_tree() :
 				var varibute : Variant = asset.get(attribute);
 				cfg_file.set_value(section, attribute, varibute);
 	);
-	cfg_file.save(ProjectManager.current_project_config.project_path + "/assets.cfg");
+	cfg_file.save(file_path);
 
 func load_asset_tree(file_path : String) : 
 	var cfg_file : ConfigFile = ConfigFile.new();

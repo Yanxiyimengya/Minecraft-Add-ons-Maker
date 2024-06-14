@@ -10,7 +10,7 @@ signal change_texture(texture_resource : ResourceManager.ResourceData);
 var texture : Texture2D = null : 
 	set(value) : 
 		if (value != null) :
-			%ItemTextureRect.custom_minimum_size = Vector2(50, 50);
+			%ItemTextureRect.custom_minimum_size = Vector2(80, 80);
 		else : 
 			%ItemTextureRect.custom_minimum_size = Vector2.ZERO;
 		%ItemTextureRect.texture = value;
@@ -29,7 +29,7 @@ func _drop_data(at_position: Vector2, data: Variant) :
 	if (res_data.data is MinecraftTextureResource) : 
 		texture = res_data.data.texture;
 		change_texture.emit(res_data);
-		
+	# 拖拽数据
 "
 
 [node name="ItemEdit" type="MarginContainer"]
@@ -46,6 +46,34 @@ script = ExtResource("1_4lc85")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ItemIDNamespace" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/ItemIDNamespace"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "物品命名空间"
+
+[node name="NameSpaceButton" type="OptionButton" parent="VBoxContainer/ItemIDNamespace"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ItemID" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/ItemID"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "物品ID"
+
+[node name="ItemIDEdit" type="LineEdit" parent="VBoxContainer/ItemID"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+context_menu_enabled = false
 
 [node name="TextureEdit" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
@@ -55,18 +83,64 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "物品纹理"
 
-[node name="ItemTextureContainer" type="PanelContainer" parent="VBoxContainer/TextureEdit"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/TextureEdit"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="ItemTextureContainer" type="PanelContainer" parent="VBoxContainer/TextureEdit/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 script = SubResource("GDScript_52dx8")
 
-[node name="ItemTextureRect" type="TextureRect" parent="VBoxContainer/TextureEdit/ItemTextureContainer"]
+[node name="ItemTextureRect" type="TextureRect" parent="VBoxContainer/TextureEdit/HBoxContainer/ItemTextureContainer"]
 unique_name_in_owner = true
+texture_filter = 1
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-expand_mode = 1
+expand_mode = 5
+
+[node name="ResetItemTextureButton" type="Button" parent="VBoxContainer/TextureEdit/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "清空"
+
+[node name="ItemCategory" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/ItemCategory"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "物品类别"
+
+[node name="CategoryOptionButton" type="OptionButton" parent="VBoxContainer/ItemCategory"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+item_count = 4
+popup/item_0/text = "建筑"
+popup/item_0/id = 0
+popup/item_1/text = "装备"
+popup/item_1/id = 1
+popup/item_2/text = "物品"
+popup/item_2/id = 2
+popup/item_3/text = "自然"
+popup/item_3/id = 3
+
+[node name="Foil" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/Foil"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "显示附魔效果"
+
+[node name="FoilCheckBox" type="CheckBox" parent="VBoxContainer/Foil"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="StackedByData" type="VBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
@@ -84,17 +158,21 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MaxStackSizeContainer" type="HBoxContainer" parent="VBoxContainer/StackedByData"]
+[node name="MaxStackSizeContainer" type="MarginContainer" parent="VBoxContainer/StackedByData"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
+theme_override_constants/margin_left = 30
 
-[node name="Label" type="Label" parent="VBoxContainer/StackedByData/MaxStackSizeContainer"]
+[node name="MaxStackSizeContainer" type="HBoxContainer" parent="VBoxContainer/StackedByData/MaxStackSizeContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/StackedByData/MaxStackSizeContainer/MaxStackSizeContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "最大堆叠数量"
 
-[node name="MaxStackSizeSpinBox" type="SpinBox" parent="VBoxContainer/StackedByData/MaxStackSizeContainer"]
+[node name="MaxStackSizeSpinBox" type="SpinBox" parent="VBoxContainer/StackedByData/MaxStackSizeContainer/MaxStackSizeContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -102,6 +180,50 @@ min_value = 1.0
 max_value = 64.0
 value = 1.0
 
-[connection signal="change_texture" from="VBoxContainer/TextureEdit/ItemTextureContainer" to="." method="_on_panel_change_texture"]
-[connection signal="pressed" from="VBoxContainer/StackedByData/HBoxContainer/StackedByDataCheckBox" to="." method="_on_stacked_by_data_check_box_pressed"]
-[connection signal="value_changed" from="VBoxContainer/StackedByData/MaxStackSizeContainer/MaxStackSizeSpinBox" to="." method="_on_max_stack_size_spin_box_value_changed"]
+[node name="FoosAttribute" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="IsFood" type="HBoxContainer" parent="VBoxContainer/FoosAttribute"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/FoosAttribute/IsFood"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "作为食物"
+
+[node name="IsFoodCheckBox" type="CheckBox" parent="VBoxContainer/FoosAttribute/IsFood"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FoodAttributesContainer" type="MarginContainer" parent="VBoxContainer/FoosAttribute"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 30
+
+[node name="FoodAttributesContainer" type="VBoxContainer" parent="VBoxContainer/FoosAttribute/FoodAttributesContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/FoosAttribute/FoodAttributesContainer/FoodAttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/FoosAttribute/FoodAttributesContainer/FoodAttributesContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "可以一直吃"
+
+[node name="CanAwaysEatCheckBox" type="CheckBox" parent="VBoxContainer/FoosAttribute/FoodAttributesContainer/FoodAttributesContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[connection signal="text_changed" from="VBoxContainer/ItemID/ItemIDEdit" to="." method="_on_item_id_edit_text_changed"]
+[connection signal="change_texture" from="VBoxContainer/TextureEdit/HBoxContainer/ItemTextureContainer" to="." method="_on_panel_change_texture"]
+[connection signal="pressed" from="VBoxContainer/TextureEdit/HBoxContainer/ResetItemTextureButton" to="." method="_on_reset_item_texture_button_pressed"]
+[connection signal="item_selected" from="VBoxContainer/ItemCategory/CategoryOptionButton" to="." method="_on_category_option_button_item_selected"]
+[connection signal="toggled" from="VBoxContainer/Foil/FoilCheckBox" to="." method="_on_foil_check_box_toggled"]
+[connection signal="toggled" from="VBoxContainer/StackedByData/HBoxContainer/StackedByDataCheckBox" to="." method="_on_stacked_by_data_check_box_toggled"]
+[connection signal="value_changed" from="VBoxContainer/StackedByData/MaxStackSizeContainer/MaxStackSizeContainer/MaxStackSizeSpinBox" to="." method="_on_max_stack_size_spin_box_value_changed"]
+[connection signal="toggled" from="VBoxContainer/FoosAttribute/IsFood/IsFoodCheckBox" to="." method="_on_is_food_check_box_toggled"]
+[connection signal="toggled" from="VBoxContainer/FoosAttribute/FoodAttributesContainer/FoodAttributesContainer/HBoxContainer/CanAwaysEatCheckBox" to="." method="_on_can_aways_eat_check_box_toggled"]

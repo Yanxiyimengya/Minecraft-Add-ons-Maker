@@ -13,9 +13,9 @@ var project_name : String = \"\";
 var project_path : String = \"\";
 
 func _ready() : 
-	var project_path = get_default_project_path();
-	project_path_edit.text = get_filepath_parent(project_path);
-	project_name_edit.text = project_path.get_file();
+	var def_proj_path = get_default_project_path();
+	project_path_edit.text = get_filepath_parent(def_proj_path);
+	project_name_edit.text = def_proj_path.get_file();
 	
 	
 	
@@ -33,18 +33,6 @@ func _ready() :
 		); # 获取文件夹路径填入
 		#%ProjectPathErrorLabel.hide();
 	);
-	
-	#%ProjectNameEdit.text_changed.connect(func(new_text : String) :
-		#if (!new_text.is_empty()) : 
-			#%ProjectNameErrorLabel.hide();
-			#
-	#);
-	## 当使用默认项目名的时候更新项目路径编辑器的内容
-	#
-	#%ProjectPathEdit.text_changed.connect(func(_new_text : String) : 
-		#if (!project_path_edit.text.is_empty()) : 
-			#%ProjectPathErrorLabel.hide();
-		#);
 	
 	
 

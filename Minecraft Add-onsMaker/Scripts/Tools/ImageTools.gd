@@ -1,6 +1,7 @@
 extends Object;
 class_name ImageTools;
 
+@warning_ignore("integer_division")
 static func set_proportional(img : Image) -> Image : 
 	var size : Vector2i = img.get_size();
 	var cut_rest : Rect2i = Rect2i(Vector2i.ZERO, img.get_size());

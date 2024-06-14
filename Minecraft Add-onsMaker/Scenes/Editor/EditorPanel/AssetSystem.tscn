@@ -4,8 +4,11 @@
 
 [sub_resource type="GDScript" id="GDScript_3bupa"]
 script/source = "extends Container;
-
 @onready var asset_tree : Tree = %AssetTree;
+
+const MC_ITEM_ICON : Texture = preload(\"res://Assets/Images/Icons/Licon/mc_item_icon.png\");
+const MC_BLOCK_ICON : Texture = preload(\"res://Assets/Images/Icons/Licon/mc_block_icon.png\");
+const MC_FOLDER_ICON : Texture = preload(\"res://Assets/Images/Icons/Licon/mc_folder_icon.png\");
 
 func _ready() : 
 	var res_root : TreeItem = asset_tree.create_item();
@@ -23,7 +26,7 @@ func _ready() :
 		match(id) : 
 			0 : 
 				asset_tree.checked_data.emit(selected_item.get_metadata(0).get_metadata(0));
-			2: edit_resource_item(selected_item);
+			2: edit_item(selected_item);
 			3 : remove_asset_item(selected_item);
 	);
 	
@@ -40,7 +43,10 @@ func _ready() :
 	$FolderPopupMenu/CreateMenu.id_pressed.connect(func(id : int) : 
 		var selected_item : TreeItem = asset_tree.get_selected();
 		match(id) : 
-			0 : create_new_item(\"new item\", selected_item);
+			0 : 
+				var item : TreeItem = create_new_item(\"new item\", selected_item);
+				await get_tree().process_frame;
+				edit_item(item);
 			2 : create_folder(\"new folder\", selected_item, true);
 	);
 	$FolderPopupMenu.id_pressed.connect(func(id : int) : 
@@ -50,7 +56,7 @@ func _ready() :
 		match(id) : 
 			2 : selected_item.collapsed = false;
 			3 : selected_item.collapsed = true;
-			5 : edit_resource_item(selected_item);
+			5 : edit_item(selected_item);
 			6 : remove_asset_item(selected_item);
 	);
 
@@ -68,19 +74,7 @@ func _asset_tree_added_item(item : TreeItem) :
 	if (data.ascription != null) : 
 		path = data.ascription.get_parent().get_metadata(0).path;
 	
-	var parent_item : TreeItem = TreeTools.find_item_to_dir(asset_tree, path);
-	if (parent_item == null) : 
-		parent_item = asset_tree.get_root();
-	
-	if (data.is_folder) : 
-		var folder_item : TreeItem = parent_item.create_child();
-		folder_item.set_text(0, item_name);
-		folder_item.set_metadata(0, item);
-		folder_item.set_text_overrun_behavior(0, TextServer.OVERRUN_TRIM_ELLIPSIS);
-	else : 
-		append_asset_item(TreeTools.find_item_to_dir(asset_tree, path), data);
-
-
+	append_asset_item(TreeTools.find_item_to_dir(asset_tree, path), item);
 
 
 
@@ -114,30 +108,29 @@ func set_porup_menu(state : PorupState) :
 			$FolderPopupMenu.show();
 			$FolderPopupMenu.position = DisplayServer.mouse_get_position();
 
-
-
-
-
-
 func create_new_item(item_name : String, current_root : TreeItem) -> TreeItem : 
 	var asset : MinecraftItemAsset = MinecraftItemAsset.new();
 	
 	var parent_item : TreeItem = AssetManager.append_asset_to_tree_no_signal(item_name, asset, current_root.get_metadata(0));
 	if (parent_item == null) : return;
-	var item : TreeItem = current_root.create_child();
-	item.set_text(0, parent_item.get_text(0));
-	item.set_metadata(0, parent_item);
-	item.set_text_overrun_behavior(0, TextServer.OVERRUN_TRIM_ELLIPSIS);
-	
+	var item : TreeItem = append_asset_item(current_root, parent_item);
 	return item;
 
-func append_asset_item(current_root : TreeItem, data : AssetManager.AssetData) -> TreeItem : 
+
+func append_asset_item(current_root : TreeItem, asset_item : TreeItem) -> TreeItem : 
 	var new_item : TreeItem = current_root.create_child();
-	new_item.set_text(0, data.ascription.get_text(0));
-	new_item.set_metadata(0, data.ascription);
-	var asset_data : MinecraftBaseAsset = data.data;
-	if (asset_data is MinecraftItemAsset) :
-		new_item.set_icon(0, null);
+	var data : AssetManager.AssetData = asset_item.get_metadata(0);
+	new_item.set_text(0, asset_item.get_text(0));
+	
+	if (data.is_folder) : 
+		new_item.set_metadata(0, asset_item);
+		new_item.set_icon(0, MC_FOLDER_ICON);
+	else : 
+		new_item.set_metadata(0, asset_item);
+		var asset_data : MinecraftBaseAsset = data.data;
+		if (asset_data is MinecraftItemAsset) :
+			new_item.set_icon(0, MC_ITEM_ICON);
+	
 	new_item.set_text_overrun_behavior(0, TextServer.OVERRUN_TRIM_ELLIPSIS);
 	return new_item;
 	# 从资产树中的资源数据加载一项进入可视资产树
@@ -145,10 +138,7 @@ func append_asset_item(current_root : TreeItem, data : AssetManager.AssetData) -
 func create_folder(folder_name : String, current_root : TreeItem, edit : bool = false) -> TreeItem : 
 	var res_folder : TreeItem = AssetManager.create_folder_no_signal(folder_name, current_root.get_metadata(0));
 	if (res_folder == null) : return;
-	var folder_item : TreeItem = current_root.create_child();
-	folder_item.set_text(0, res_folder.get_text(0));
-	folder_item.set_metadata(0, res_folder);
-	folder_item.set_text_overrun_behavior(0, TextServer.OVERRUN_TRIM_ELLIPSIS);
+	var folder_item : TreeItem = append_asset_item(current_root, res_folder);
 	
 	if (edit) : 
 		asset_tree.set_selected(folder_item, 0);
@@ -163,16 +153,14 @@ func remove_asset_item(item : TreeItem) :
 		if(AssetManager.remove_tree_item(asset_tree_item)) : 
 			item.free();
 
-func edit_resource_item(item : TreeItem) : 
+func edit_item(item : TreeItem) : 
 	item.set_editable(0, true);
+	if (!asset_tree.has_focus()) : 
+		asset_tree.grab_focus();
 	asset_tree.set_selected(item, 0);
+	await get_tree().process_frame;
 	asset_tree.edit_selected();
 	get_viewport().set_input_as_handled();
-
-
-
-
-
 
 
 
@@ -198,6 +186,10 @@ func _gui_input(event : InputEvent) :
 func _on_item_edited() : 
 	var edit_item : TreeItem = self.get_selected();
 	var item : TreeItem = edit_item.get_metadata(0);
+	var text : String = edit_item.get_text(0);
+	if (text.is_empty()) : 
+		edit_item.set_text(0, item.get_text(0));
+		return;
 	if (item != null) : 
 		AssetManager.rename_tree_item(item, edit_item.get_text(0));
 		item.set_text(0, edit_item.get_text(0));
@@ -241,6 +233,7 @@ size_flags_horizontal = 3
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/icon_max_width = 20
 theme_override_styles/panel = SubResource("StyleBoxEmpty_3ftkk")
 allow_rmb_select = true
 scroll_horizontal_enabled = false

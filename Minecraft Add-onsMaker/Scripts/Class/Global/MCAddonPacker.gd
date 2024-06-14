@@ -57,7 +57,7 @@ func packaged_items(zip_packer : ZIPPacker, item_dict : Dictionary) :
 			packaged_items(zip_packer, item_dict[emits]);
 		else : 
 			var item_data : MinecraftItemAsset = item_dict[emits];
-			var item_identifier : String = "test:" + item_data.id;
+			var item_identifier : String = item_data.id_namespace + ":" + item_data.id;
 			# 长ID
 			var item_json : Dictionary = {
 				"format_version" : str(pack_config.min_engine_version[0]) + "." + \
@@ -78,13 +78,17 @@ func packaged_items(zip_packer : ZIPPacker, item_dict : Dictionary) :
 			item_components["minecraft:foil"] = item_data.foil;
 			if (item_data.has_damage) : 
 				item_components["minecraft:max_damage"] = item_data.max_damage;
+			if (item_data.is_food) : 
+				var food_attributes : Dictionary = {};
+				item_json["minecraft:item"]["components"]["minecraft:food"] = food_attributes;
+				food_attributes["can_always_eat"] = item_data.can_always_eat;
 			
 			zip_packer.start_file("data_pack/items/" + emits + ".json");
 			zip_packer.write_file(JSON.stringify(item_json).to_utf8_buffer());
 			zip_packer.close_file();
 			
 			if (pack_config.is_resource_pack) : 
-				if (item_data.texture != null) : 
+				if (!item_data.texture_path.is_empty()) : 
 					if (pack_config.use_new_item_api) : 
 						pass;
 					else : 
@@ -93,14 +97,13 @@ func packaged_items(zip_packer : ZIPPacker, item_dict : Dictionary) :
 							"minecraft:item": {
 								"description": {
 									"identifier": item_identifier,
-									"category": "Equipment"#item_data.category
+									"category": MinecraftItemAsset.CATEGORYS[item_data.category]
 								},
 								"components": {
 									"minecraft:icon": item_data.id
 								}
 							}
 						};
-						
 						zip_packer.start_file("resource_pack/items/" + emits + ".json");
 						zip_packer.write_file(JSON.stringify(item_res_json).to_utf8_buffer());
 						zip_packer.close_file();
@@ -140,14 +143,15 @@ func packaged_resource_pack(zip_packer : ZIPPacker, data : PackageConfig) :
 			"texture_data": {}
 		}
 		for item in items : 
-			var item_data = items[item];
-			if (item_data.texture == null) : 
+			var item_data : MinecraftItemAsset = items[item];
+			if (item_data.texture_path.is_empty()) : 
 				continue;
 			var texture_path : String = item_data.texture_path;
 			var pos : int = texture_path.get_file().rfind(".");
 			texture_path = texture_path.substr(1, pos);
+			# 纹理路径 移除图片路径的后缀名称
+			
 			item_textures["texture_data"][item_data.id] = {"textures" : "textures/" + texture_path};
-			print(texture_path)
 		zip_packer.start_file("resource_pack/textures/item_texture.json");
 		zip_packer.write_file(JSON.stringify(item_textures).to_utf8_buffer());
 		zip_packer.close_file();

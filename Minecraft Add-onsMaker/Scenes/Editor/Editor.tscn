@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://da4h7gw2hkkq3"]
+[gd_scene load_steps=24 format=3 uid="uid://da4h7gw2hkkq3"]
 
 [ext_resource type="Theme" uid="uid://c3gb35qykvkhd" path="res://Assets/Theme/EditorGUI.tres" id="1_cb2ps"]
 [ext_resource type="Script" path="res://addons/dockable_container/dockable_container.gd" id="2_e41y2"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://addons/dockable_container/layout.gd" id="5_bsi6d"]
 [ext_resource type="PackedScene" uid="uid://bduidxqriia4b" path="res://Scenes/Editor/EditorPanel/FileSystem.tscn" id="6_ud30c"]
 [ext_resource type="StyleBox" uid="uid://c4klq167q1awq" path="res://Assets/Theme/Styles/EditorPanel/EditorBarPanel.tres" id="7_ppg25"]
+[ext_resource type="PackedScene" uid="uid://dh7ccotv343qt" path="res://Scenes/Editor/3DWorld/ItemPreview/Item3DPreview.tscn" id="8_hymgi"]
 [ext_resource type="PackedScene" uid="uid://g6o2cpumkb7i" path="res://Scenes/Editor/EditorPanel/AssetSystem.tscn" id="8_tp05k"]
 
 [sub_resource type="GDScript" id="GDScript_p57vs"]
@@ -181,7 +182,6 @@ func open_edit(target : Variant) :
 	if (currect_edit != null) : 
 		currect_edit.visible = false;
 		currect_edit.set_process(false);
-	var previous_edit : Node = currect_edit;
 	
 	if (target is MinecraftTextureResource) : 
 		currect_edit = editor_map[MinecraftTextureResource];
@@ -260,6 +260,8 @@ stretch = true
 handle_input_locally = false
 size = Vector2i(732, 477)
 render_target_update_mode = 4
+
+[node name="Item3dPreview" parent="EditorDockable/View/SubViewportContainer/SubViewport" instance=ExtResource("8_hymgi")]
 
 [node name="AttributeEditor" type="PanelContainer" parent="EditorDockable"]
 unique_name_in_owner = true

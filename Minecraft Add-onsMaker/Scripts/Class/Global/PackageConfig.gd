@@ -35,6 +35,9 @@ var modules : Dictionary = {
 	"data_modules" = []
 };
 # 项目使用的模块
+var namespaces : Array = [];
+# Addons的命名空间
+
 var pack_bind : bool = false;
 # 是否开启包绑定
 var packaged_type : int = PackedType.Resource | PackedType.Data;
@@ -91,6 +94,7 @@ func export_config(export_path : String) :
 	proect_config_data["pack_bind"] = self.pack_bind;
 	## ————————————
 	proect_config_data["modules"] = self.modules;
+	proect_config_data["namespaces"] = self.namespaces;
 	proect_config_data["packaged_type"] = self.packaged_type;
 	
 	FileTools.save_file(export_path + "/config.json", JSON.stringify(proect_config_data));
@@ -115,6 +119,7 @@ static func import_config(proj_path : String) -> PackageConfig :
 	proj_config.pack_bind = config_data["pack_bind"];
 	## ————————————
 	proj_config.modules = config_data["modules"];
+	proj_config.namespaces = config_data["namespaces"];
 	proj_config.packaged_type = config_data["packaged_type"];
 	## ————————————
 	return proj_config;

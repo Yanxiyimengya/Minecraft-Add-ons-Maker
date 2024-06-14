@@ -19,6 +19,11 @@ enum TOP_BAR_ITEMS {
 };
 
 func _ready() : 
+	#visible = false;
+	#set_process(false);
+	initialize_gui();
+
+func initialize_gui() : 
 	version_lable.text = Global.string_placeholder("Version {version}", "{_}");
 	
 	add_menubutton_on_topbar("文件");

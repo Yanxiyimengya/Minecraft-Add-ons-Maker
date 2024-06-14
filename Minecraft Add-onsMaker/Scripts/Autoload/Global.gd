@@ -64,4 +64,5 @@ func string_placeholder(_str : String, format = "{_}") -> String :
 
 func _notification(what : int):
 	if (what == NOTIFICATION_WM_CLOSE_REQUEST) : 
+		ProjectManager.save_project(ProjectManager.current_project_config, ProjectManager.current_project_config.project_path);
 		cache.save_project_config(CONFIG_DIR);

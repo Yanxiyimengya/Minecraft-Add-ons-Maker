@@ -20,7 +20,7 @@ func _ready() :
 			0 : 
 				res_tree.checked_data.emit(selected_item.get_metadata(0).get_metadata(0));
 			3 : edit_resource_item(selected_item);
-			5 : remove_resource_item(selected_item);
+			4 : remove_resource_item(selected_item);
 			6 : ResourceManager.open_resource_in_file_manager(selected_item.get_metadata(0));
 	);
 	
@@ -42,7 +42,9 @@ func _ready() :
 		var selected_item : TreeItem = res_tree.get_selected();
 		match(id) : 
 			2 : 
-				create_folder("new folder", selected_item, true);
+				var item : TreeItem = create_folder("new folder", selected_item, true);
+				await get_tree().process_frame;
+				edit_resource_item(item);
 	);
 	$FolderPopupMenu.id_pressed.connect(func(id : int) : 
 		var selected_item : TreeItem = res_tree.get_selected();

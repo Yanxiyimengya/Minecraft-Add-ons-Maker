@@ -62,7 +62,7 @@ func add_component(comp : String) :
 				components["foil"] = false;
 		"icon" : 
 			components["icon"] = {
-				"textures" : ""
+				"texture" : ""
 			};
 
 func _save_attribute() -> Array[String] : 

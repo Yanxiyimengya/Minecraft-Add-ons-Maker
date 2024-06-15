@@ -31,8 +31,7 @@ func packaged_resource_pack() :
 			var item_data : MinecraftItemAsset = items[item];
 			if (!item_data.components.has("icon")) : 
 				continue;
-			var texture_path : String = item_data.components["icon"]["textures"];
-			# 纹理路径 移除图片路径的后缀名称
+			var texture_path : String = item_data.components["icon"]["texture"];
 			item_textures["texture_data"][item_data.id] = {"textures" : "textures/" + texture_path};
 		zip_packer.start_file(BaseAddonPacker.RESOURCE_FOLDER_NAME + "/textures/item_texture.json");
 		zip_packer.write_file(JSON.stringify(item_textures).to_utf8_buffer());
@@ -63,12 +62,12 @@ func packaged_items(item_dict : Dictionary) :
 			item_json["minecraft:item"]["components"] = item_components;
 			for comp in item_data.components : 
 				item_components["minecraft:"+comp] = item_data.components[comp];
-			# 物品组件添加
+			# 物品组件添加 
+			
 			if (item_data.components.has("icon")) : 
 				if(pack_config.use_new_item_api) : 
-					var aaa = item_components["minecraft:icon"]["textures"];
-					item_components["minecraft:icon"]["textures"] = "textures/" + item_components["minecraft:icon"]["textures"];
-				#else : 
+					item_components["minecraft:icon"]["texture"] = item_data.id;
+				else : 
 					if (pack_config.is_resource_pack) : 
 						var item_res_json : Dictionary = {
 							"format_version": item_json["format_version"],

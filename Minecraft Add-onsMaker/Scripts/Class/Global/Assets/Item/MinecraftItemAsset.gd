@@ -19,43 +19,51 @@ func _init() :
 	type = Global.ASSET_MC_ITEM;
 
 var components : Dictionary = {};
-enum Component {
-	MaxStackSize,	# 最大堆叠数
-	Icon,			# 物品贴图
-	Food,	# 食物
-	Glint,	# 附魔光效
-	Durability,		# 耐久
-	HandEquipped,	# 手持模式
-};
-func add_component(comp : Component) : 
+
+#minecraft:block
+#minecraft:food
+#minecraft:foil
+#minecraft:hand_equipped
+#minecraft:max_damage
+#minecraft:max_stack_size
+#minecraft:seed
+#minecraft:stacked_by_data
+#minecraft:use_duration
+
+func add_component(comp : String) : 
 	match (comp) : 
-		Component.MaxStackSize : 
-			components["max_stack_size"] = {
-				"value" : 64
-			};
-		Component.Icon : 
-			components["icon"] = {
-				"textures" : ""
-			};
-		Component.Food : 
+		"max_stack_size" : 
+			components["max_stack_size"] = 64;
+		"hand_equipped" : 
+			components["hand_equipped"] = false;
+		"food" : 
 			components["food"] = {
 				"can_always_eat": false,	# 忽略饱食度
 				"nutrition" : 3,			# 营养价值
 				"saturation_modifier": 0.6,	# 饱和度
 				"effects" : [],				# 使用后的效果
 			}
-		Component.Glint : 
-			components["glint"] = false;
-		Component.Durability : 
-			components["durability"] = {
-				"damage_chance" : {
-					"min" : 100,
-					"max" : 100,
-				},
-				"max_durability" : 100
+		
+		"durability" : 
+			if (ProjectManager.current_project_config.use_new_item_api) : 
+				components["durability"] = {
+					"damage_chance" : {
+						"min" : 100,
+						"max" : 100,
+					},
+					"max_durability" : 100
+				};
+			else : 
+				components["max_damage"] = 100; # 耐久度
+		"glint" : 
+			if (ProjectManager.current_project_config.use_new_item_api) : 
+				components["glint"] = false; # 旧版物品API
+			else : 
+				components["foil"] = false;
+		"icon" : 
+			components["icon"] = {
+				"textures" : ""
 			};
-		Component.HandEquipped : 
-			components["hand_equipped"] = false;
 
 func _save_attribute() -> Array[String] : 
 	return ["id","id_namespace", "components"];

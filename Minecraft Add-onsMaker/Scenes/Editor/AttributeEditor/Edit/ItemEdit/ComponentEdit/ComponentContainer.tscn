@@ -1,0 +1,58 @@
+[gd_scene load_steps=2 format=3 uid="uid://piw136773cmj"]
+
+[sub_resource type="GDScript" id="GDScript_fihf7"]
+script/source = "extends Control;
+
+signal remove_component();
+
+var title : String = \"\" : 
+	set(value) : 
+		%TitleLabel.text = value;
+
+func add_component_edit(edit : Node) : 
+	%ComponentContainer.add_child(edit);
+
+func _on_remove_component_button_pressed() : 
+	remove_component.emit();
+	self.queue_free();
+"
+
+[node name="ComponentContainer" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_fihf7")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "堆叠"
+
+[node name="RemoveComponentButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+text = "移除组件"
+
+[node name="ComponentContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 15
+
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/RemoveComponentButton" to="." method="_on_remove_component_button_pressed"]

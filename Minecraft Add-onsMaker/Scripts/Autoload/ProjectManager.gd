@@ -26,7 +26,7 @@ func load_project(proj_path : String) -> PackageConfig :
 	var project : PackageConfig =  PackageConfig.import_config(proj_path);
 	if (project == null) : 
 		return;
-	
+	print(proj_path + "/icon.png")
 	if (FileAccess.file_exists(proj_path + "/icon.png")) : 
 		var icon_image : Image = Image.load_from_file(proj_path + "/icon.png");
 		project.project_icon = ImageTexture.create_from_image(icon_image);

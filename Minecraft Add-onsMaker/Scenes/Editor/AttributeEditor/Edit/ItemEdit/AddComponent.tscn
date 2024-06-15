@@ -1,29 +1,37 @@
 [gd_scene load_steps=2 format=3 uid="uid://c8d8pr3jxwny8"]
 
 [sub_resource type="GDScript" id="GDScript_np6t8"]
-script/source = "extends Control;
+script/source = "extends Window;
 @onready var tree := %Tree;
+
+signal selected_component(component_id : String);
 
 var root : TreeItem;
 var items : Dictionary = {};
+var target : MinecraftItemAsset = null;
 
 func _ready():
 	root = tree.create_item();
 	root.set_text(0, \"物品组件\");
 	
-	add_item(\"可堆叠\");
-	add_item(\"耐久性\");
-	add_item(\"食物\");
-	add_item(\"光效\");
-	
+	add_item(\"纹理\", \"icon\");
+	add_item(\"可堆叠\", \"max_stack_size\");
+	add_item(\"食物\", \"food\");
+	add_item(\"光效\", \"glint\"); 
+	add_item(\"耐久\", \"durability\");
+	var new_api : bool = ProjectManager.current_project_config.use_new_item_api;
 
-func add_item(component_name : String) : 
+func update() : 
+	for item in items : 
+		items[item].visible = (!target.components.has(items[item].get_metadata(0)));
+
+func add_item(component_name : String, id : String) : 
 	if (items.has(component_name)) : 
 		return;
 	var new_item : TreeItem = root.create_child();
 	new_item.set_text(0, component_name);
+	new_item.set_metadata(0, id);
 	items[component_name] = new_item;
-
 
 func _on_search_line_edit_text_changed(new_text : String) : 
 	if (new_text.is_empty()) : 
@@ -36,23 +44,23 @@ func _on_search_line_edit_text_changed(new_text : String) :
 func _on_tree_gui_input(event : InputEvent):
 	if (event is InputEventMouseButton && event.double_click) : 
 		var tree_item : TreeItem = tree.get_item_at_position(event.position);
-		if (tree_item == null) : 
+		if (tree_item == null || tree_item == root) : 
 			return;
-		var text : String = tree_item.get_text(0);
-		
+		var id : String = tree_item.get_metadata(0);
+		selected_component.emit(id);
+
+func _on_close_requested() :
+	self.hide();
 "
 
-[node name="AddComponentWindow" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="AddComponentWindow" type="Window"]
+title = "添加物品组件"
+initial_position = 3
+size = Vector2i(720, 480)
+current_screen = 0
 script = SubResource("GDScript_np6t8")
 
 [node name="Panel" type="Panel" parent="."]
-layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -60,7 +68,6 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -97,5 +104,6 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
 [connection signal="text_changed" from="MarginContainer/VBoxContainer3/VBoxContainer/SearchLineEdit" to="." method="_on_search_line_edit_text_changed"]
 [connection signal="gui_input" from="MarginContainer/VBoxContainer3/VBoxContainer2/Tree" to="." method="_on_tree_gui_input"]

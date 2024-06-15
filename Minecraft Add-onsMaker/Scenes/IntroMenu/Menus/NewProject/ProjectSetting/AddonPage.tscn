@@ -11,13 +11,23 @@ script/source = "extends \"./BaseProjectSettingUI.gd\";
 
 var project_name : String = \"\";
 var project_path : String = \"\";
+var project_min_engine_version : Array [int]= [1, 16, 0];
 
 func _ready() : 
 	var def_proj_path = get_default_project_path();
 	project_path_edit.text = get_filepath_parent(def_proj_path);
 	project_name_edit.text = def_proj_path.get_file();
 	
-	
+	%MinEngineVersionOptionButton.add_item(\"1.16.x\");
+	%MinEngineVersionOptionButton.add_item(\"1.20.x\");
+	%MinEngineVersionOptionButton.item_selected.connect(func(index : int) : 
+		var text : String = %MinEngineVersionOptionButton.get_item_text(index);
+		match(text) :
+			\"1.16.x\" : 
+				project_min_engine_version = [1, 16, 0];
+			\"1.20.x\" : 
+				project_min_engine_version = [1, 20, 0];
+	);
 	
 	%AddonsVersionEdit1.get_line_edit().context_menu_enabled = false;
 	%AddonsVersionEdit2.get_line_edit().context_menu_enabled = false;
@@ -81,6 +91,8 @@ func _create_project() -> PackageConfig :
 		(%AddonsVersionEdit2.value), 
 		(%AddonsVersionEdit3.value),
 	];
+	project_config.min_engine_version = project_min_engine_version;
+	
 	project_config.packaged_type = int(use_res)*PackageConfig.PackedType.Resource | int(use_data)*PackageConfig.PackedType.Data;
 	if (use_res) : 
 		project_config.append_resource_module();
@@ -213,19 +225,11 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("1_taxa0")
 text = "最小Add-ons引擎版本"
 
-[node name="OptionButton" type="OptionButton" parent="MinEngineVersion/MinEngineVersion"]
+[node name="MinEngineVersionOptionButton" type="OptionButton" parent="MinEngineVersion/MinEngineVersion"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(120, 35)
 layout_mode = 2
-item_count = 4
 selected = 0
-popup/item_0/text = "1.8.0"
-popup/item_0/id = 0
-popup/item_1/text = "1.12.0"
-popup/item_1/id = 1
-popup/item_2/text = "1.16.0"
-popup/item_2/id = 2
-popup/item_3/text = "1.20.0"
-popup/item_3/id = 3
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2

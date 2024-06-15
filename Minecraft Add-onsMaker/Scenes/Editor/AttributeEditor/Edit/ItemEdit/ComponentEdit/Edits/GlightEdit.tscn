@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3 uid="uid://cd4of7mn7begx"]
+
+[sub_resource type="GDScript" id="GDScript_twfbf"]
+script/source = "extends BaseAssetComponentEdit;
+
+var new_api : bool = false;
+var comp_name : String = \"\";
+
+func _ready() : 
+	new_api = ProjectManager.current_project_config.use_new_item_api;
+	if (new_api) : 
+		comp_name = \"glint\";
+	else : 
+		comp_name = \"foil\";
+	%CheckBox.button_pressed = target.data.components[comp_name];
+
+func _on_check_box_toggled(toggled_on : bool):
+	target.data.components[comp_name] = toggled_on;
+"
+
+[node name="GlightEdit" type="HBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_twfbf")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "持有附魔光效"
+
+[node name="CheckBox" type="CheckBox" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[connection signal="toggled" from="CheckBox" to="." method="_on_check_box_toggled"]

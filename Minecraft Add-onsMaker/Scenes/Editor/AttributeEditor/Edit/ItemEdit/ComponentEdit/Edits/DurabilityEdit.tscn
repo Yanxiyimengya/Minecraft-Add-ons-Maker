@@ -1,0 +1,123 @@
+[gd_scene load_steps=2 format=3 uid="uid://mwqyas0lga4u"]
+
+[sub_resource type="GDScript" id="GDScript_avh44"]
+script/source = "extends BaseAssetComponentEdit;
+
+var new_api : bool = false;
+
+var min_change : int = 1 : 
+	set(value) : 
+		if (%DamageChanceMaxHSlider.value < value) : 
+			%DamageChanceMaxHSlider.set_value_no_signal(value);
+			%DamageChanceMaxLabel.text = str(value);
+		%DamageChanceMinLabel.text = str(value);
+var max_change : int = 100 : 
+	set(value) : 
+		if (%DamageChanceMinHSlider.value > value) : 
+			%DamageChanceMinHSlider.set_value_no_signal(value);
+			%DamageChanceMinLabel.text = str(value);
+		%DamageChanceMaxLabel.text = str(value);
+
+func _ready() : 
+	new_api = ProjectManager.current_project_config.use_new_item_api;
+	if (new_api) : 
+		%MaxDurabilitySpinBox.value = target.data.components[\"durability\"][\"max_durability\"];
+		
+		min_change = target.data.components[\"durability\"][\"damage_chance\"][\"min\"]
+		max_change = target.data.components[\"durability\"][\"damage_chance\"][\"max\"];
+	else : 
+		%MaxDurabilitySpinBox.value = target.data.components[\"max_damage\"];
+	%NewAPIAttributes.visible = new_api;
+
+func _on_max_durability_spin_box_value_changed(value : float) : 
+	if (new_api) : 
+		target.data.components[\"durability\"][\"max_durability\"] = value;
+	else : 
+		target.data.components[\"max_damage\"] = value;
+
+func _on_damage_chance_min_h_slider_value_changed(value : float) : 
+	if (new_api) : 
+		target.data.components[\"durability\"][\"damage_chance\"][\"min\"] = value;
+	min_change = value;
+func _on_damage_chance_max_h_slider_value_changed(value : float) :
+	if (new_api) : 
+		target.data.components[\"durability\"][\"damage_chance\"][\"max\"] = value;
+	max_change = value;
+
+
+"
+
+[node name="DurabilityEdit" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_avh44")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "最大耐久"
+
+[node name="MaxDurabilitySpinBox" type="SpinBox" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 1e+10
+value = 100.0
+
+[node name="NewAPIAttributes" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="NewAPIAttributes"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="NewAPIAttributes/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "耐久消耗最小几率"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="NewAPIAttributes/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DamageChanceMinHSlider" type="HSlider" parent="NewAPIAttributes/HBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DamageChanceMinLabel" type="Label" parent="NewAPIAttributes/HBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="NewAPIAttributes"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="NewAPIAttributes/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "耐久消耗最大几率"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="NewAPIAttributes/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DamageChanceMaxHSlider" type="HSlider" parent="NewAPIAttributes/HBoxContainer2/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+value = 100.0
+
+[node name="DamageChanceMaxLabel" type="Label" parent="NewAPIAttributes/HBoxContainer2/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[connection signal="value_changed" from="HBoxContainer/MaxDurabilitySpinBox" to="." method="_on_max_durability_spin_box_value_changed"]
+[connection signal="value_changed" from="NewAPIAttributes/HBoxContainer/HBoxContainer/DamageChanceMinHSlider" to="." method="_on_damage_chance_min_h_slider_value_changed"]
+[connection signal="value_changed" from="NewAPIAttributes/HBoxContainer2/HBoxContainer/DamageChanceMaxHSlider" to="." method="_on_damage_chance_max_h_slider_value_changed"]

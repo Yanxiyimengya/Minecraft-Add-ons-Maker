@@ -1,16 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://bgi3o02ghv0by"]
+[gd_scene load_steps=3 format=3 uid="uid://bgi3o02ghv0by"]
 
 [ext_resource type="Script" path="res://Scenes/Editor/AttributeEditor/Edit/ItemEdit/ItemEdit.gd" id="1_4lc85"]
 [ext_resource type="PackedScene" uid="uid://c8d8pr3jxwny8" path="res://Scenes/Editor/AttributeEditor/Edit/ItemEdit/AddComponent.tscn" id="2_q2rgo"]
-
-[sub_resource type="GDScript" id="GDScript_nhwtt"]
-script/source = "extends Window;
-
-
-
-func _on_close_requested() : 
-	self.hide();
-"
 
 [node name="ItemEdit" type="MarginContainer"]
 anchors_preset = 15
@@ -70,20 +61,13 @@ theme_override_constants/margin_bottom = 10
 layout_mode = 2
 text = "添加物品组件"
 
-[node name="AddComponentWindow" type="Window" parent="."]
+[node name="AddComponentWindow" parent="." instance=ExtResource("2_q2rgo")]
 unique_name_in_owner = true
-title = "添加组件"
-initial_position = 3
-size = Vector2i(720, 480)
-current_screen = 0
 visible = false
-wrap_controls = true
 exclusive = true
 popup_window = true
-script = SubResource("GDScript_nhwtt")
 
-[node name="AddComponent" parent="AddComponentWindow" instance=ExtResource("2_q2rgo")]
-
+[connection signal="item_selected" from="VBoxContainer/ItemIDNamespace/NameSpaceButton" to="." method="_on_name_space_button_item_selected"]
 [connection signal="text_changed" from="VBoxContainer/ItemID/ItemIDEdit" to="." method="_on_item_id_edit_text_changed"]
 [connection signal="pressed" from="VBoxContainer/MarginContainer/AddComponentButton" to="." method="_on_add_component_button_pressed"]
-[connection signal="close_requested" from="AddComponentWindow" to="AddComponentWindow" method="_on_close_requested"]
+[connection signal="selected_component" from="AddComponentWindow" to="." method="_on_add_component_window_selected_component"]

@@ -1,0 +1,95 @@
+[gd_scene load_steps=4 format=3 uid="uid://b8ib2a1oyv0ou"]
+
+[ext_resource type="Texture2D" uid="uid://c7po8n3h0ouoq" path="res://Assets/icon.png" id="1_wvf5d"]
+
+[sub_resource type="GDScript" id="GDScript_t0but"]
+script/source = "extends BaseAssetComponentEdit;
+
+func _ready() : 
+	if (!target.data.components[\"icon\"][\"textures\"].is_empty()) : 
+		var res_item : TreeItem = TreeTools.find_item_to_dir(ResourceManager.resource_tree, \\
+				target.data.components[\"icon\"][\"textures\"] + \".png\");
+		if (res_item != null) : 
+			var texture = res_item.get_metadata(0).data.texture;
+			%ItemTextureContainer.texture = texture;
+		else :
+			target.data.components[\"icon\"][\"textures\"] = \"\";
+
+func _on_clear_button_pressed():
+	%ItemTextureContainer.texture = null;
+	target.data.components[\"icon\"][\"textures\"] = \"\";
+
+func _on_item_texture_container_change_texture(texture_resource : ResourceManager.ResourceData):
+	var texture_path : String = texture_resource.path;
+	var file_name : String = texture_path.get_file();
+	var pos : int = file_name.rfind(\".\");
+	
+	# 纹理路径 移除图片路径的后缀名称
+	target.data.components[\"icon\"][\"textures\"]  = texture_path.substr(1, texture_path.length() - (file_name.length() - pos) - 1);
+"
+
+[sub_resource type="GDScript" id="GDScript_vamo1"]
+script/source = "extends PanelContainer;
+
+signal change_texture(texture_resource : ResourceManager.ResourceData);
+
+var texture : Texture2D = null : 
+	set(value) : 
+		if (value != null) :
+			%ItemTextureRect.custom_minimum_size = Vector2(50, 50);
+		else : 
+			%ItemTextureRect.custom_minimum_size = Vector2.ZERO;
+		%ItemTextureRect.texture = value;
+
+func _can_drop_data(position : Vector2, data) : 
+	var rect : Rect2 = self.get_rect();
+	rect.position = Vector2.ZERO;
+	if (data is Array && data.size() > 1) : 
+		if (data[0] == \"FileDrag\") : 
+			return rect.has_point(position);
+	return false;
+
+func _drop_data(at_position: Vector2, data: Variant) : 
+	var drop_data : TreeItem = data[1].get_metadata(0);
+	var res_data : ResourceManager.ResourceData = drop_data.get_metadata(0);
+	if (res_data.data is MinecraftTextureResource) : 
+		texture = res_data.data.texture;
+		change_texture.emit(res_data);
+"
+
+[node name="TextureEdit" type="HBoxContainer"]
+offset_left = 15.0
+offset_right = 1132.0
+offset_bottom = 31.0
+script = SubResource("GDScript_t0but")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "物品纹理"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ItemTextureContainer" type="PanelContainer" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = SubResource("GDScript_vamo1")
+
+[node name="ItemTextureRect" type="TextureRect" parent="HBoxContainer/ItemTextureContainer"]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("1_wvf5d")
+expand_mode = 1
+
+[node name="ClearButton" type="Button" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "清空"
+
+[connection signal="change_texture" from="HBoxContainer/ItemTextureContainer" to="." method="_on_item_texture_container_change_texture"]
+[connection signal="pressed" from="HBoxContainer/ClearButton" to="." method="_on_clear_button_pressed"]

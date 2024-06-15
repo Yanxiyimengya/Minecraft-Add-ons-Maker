@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://dgk0fyp5dlt6t"]
+
+[sub_resource type="GDScript" id="GDScript_br3u6"]
+script/source = "extends BaseAssetComponentEdit;
+
+func _ready() : 
+	%SpinBox.value = target.data.components[\"max_stack_size\"];
+
+func _on_spin_box_value_changed(value : float) : 
+	target.data.components[\"max_stack_size\"] = value;
+"
+
+[node name="HBoxContainer" type="HBoxContainer"]
+offset_left = 15.0
+offset_right = 1152.0
+offset_bottom = 648.0
+script = SubResource("GDScript_br3u6")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "最大可堆叠数"
+
+[node name="SpinBox" type="SpinBox" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 64.0
+value = 1.0
+
+[connection signal="value_changed" from="SpinBox" to="." method="_on_spin_box_value_changed"]

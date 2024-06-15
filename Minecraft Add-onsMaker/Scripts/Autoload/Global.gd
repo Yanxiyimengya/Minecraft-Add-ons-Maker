@@ -22,8 +22,8 @@ func cmd(args : Array) :
 			project_config.project_name = args[1];
 			project_config.project_path = args[2];
 			Global.cache.append_project_config(project_config.project_name, project_config.project_path);
-			return project_config;
 			
+			return project_config;
 		"ExportProject" : 
 			var packer : MCAddonPacker = MCAddonPacker.new();
 			packer.pack_config = ProjectManager.current_project_config;
@@ -64,5 +64,6 @@ func string_placeholder(_str : String, format = "{_}") -> String :
 
 func _notification(what : int):
 	if (what == NOTIFICATION_WM_CLOSE_REQUEST) : 
-		ProjectManager.save_project(ProjectManager.current_project_config, ProjectManager.current_project_config.project_path);
+		if (ProjectManager.current_project_config != null) : 
+			ProjectManager.save_project(ProjectManager.current_project_config, ProjectManager.current_project_config.project_path);
 		cache.save_project_config(CONFIG_DIR);

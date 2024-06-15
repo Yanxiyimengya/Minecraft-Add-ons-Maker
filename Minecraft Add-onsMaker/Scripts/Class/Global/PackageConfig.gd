@@ -38,8 +38,16 @@ var modules : Dictionary = {
 var namespaces : Array = [];
 # Addons的命名空间
 
-var pack_bind : bool = false;
+var pack_bind : bool = true;
 # 是否开启包绑定
+var bind_self : bool = true;
+# 如果启用包绑定 是否将项目自身创建的资源/行为包互相绑定
+var extra_dependencies : Dictionary = {
+	"resource" : [],
+	"data" : []
+};
+# 额外依赖项列表 数组里的内容是一个字典
+
 var packaged_type : int = PackedType.Resource | PackedType.Data;
 # 项目类型
 
@@ -92,6 +100,8 @@ func export_config(export_path : String) :
 	proect_config_data["res_uuid"] = self.res_uuid;
 	proect_config_data["data_uuid"] = self.data_uuid;
 	proect_config_data["pack_bind"] = self.pack_bind;
+	proect_config_data["bind_self"] = self.bind_self;
+	proect_config_data["extra_dependencies"] = self.extra_dependencies;
 	## ————————————
 	proect_config_data["modules"] = self.modules;
 	proect_config_data["namespaces"] = self.namespaces;
@@ -101,7 +111,7 @@ func export_config(export_path : String) :
 	# 保存 config.json 文件
 
 static func import_config(proj_path : String) -> PackageConfig : 
-	var config_data = JSON.parse_string(FileTools.load_file(proj_path + "/config.json"));
+	var config_data : Dictionary = JSON.parse_string(FileTools.load_file(proj_path + "/config.json"));
 	if (config_data == null) : 
 		return;
 	## ————————————
@@ -117,6 +127,8 @@ static func import_config(proj_path : String) -> PackageConfig :
 	proj_config.res_uuid = config_data["res_uuid"];
 	proj_config.data_uuid = config_data["data_uuid"];
 	proj_config.pack_bind = config_data["pack_bind"];
+	proj_config.bind_self = config_data.get("bind_self", proj_config.bind_self);
+	proj_config.extra_dependencies = config_data.get("extra_dependencies", proj_config.extra_dependencies);
 	## ————————————
 	proj_config.modules = config_data["modules"];
 	proj_config.namespaces = config_data["namespaces"];

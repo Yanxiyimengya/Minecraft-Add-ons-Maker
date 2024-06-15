@@ -1,0 +1,101 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8d8pr3jxwny8"]
+
+[sub_resource type="GDScript" id="GDScript_np6t8"]
+script/source = "extends Control;
+@onready var tree := %Tree;
+
+var root : TreeItem;
+var items : Dictionary = {};
+
+func _ready():
+	root = tree.create_item();
+	root.set_text(0, \"物品组件\");
+	
+	add_item(\"可堆叠\");
+	add_item(\"耐久性\");
+	add_item(\"食物\");
+	add_item(\"光效\");
+	
+
+func add_item(component_name : String) : 
+	if (items.has(component_name)) : 
+		return;
+	var new_item : TreeItem = root.create_child();
+	new_item.set_text(0, component_name);
+	items[component_name] = new_item;
+
+
+func _on_search_line_edit_text_changed(new_text : String) : 
+	if (new_text.is_empty()) : 
+		for item in items : 
+			items[item].visible = true;
+	else : 
+		for item in items : 
+			items[item].visible = (items[item].get_text(0).find(new_text) != -1);
+
+func _on_tree_gui_input(event : InputEvent):
+	if (event is InputEventMouseButton && event.double_click) : 
+		var tree_item : TreeItem = tree.get_item_at_position(event.position);
+		if (tree_item == null) : 
+			return;
+		var text : String = tree_item.get_text(0);
+		
+"
+
+[node name="AddComponentWindow" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_np6t8")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer3"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer3/VBoxContainer"]
+layout_mode = 2
+text = "搜索 : "
+
+[node name="SearchLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer3/VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer3"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer3/VBoxContainer2"]
+layout_mode = 2
+text = "匹配项 : "
+
+[node name="Tree" type="Tree" parent="MarginContainer/VBoxContainer3/VBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[connection signal="text_changed" from="MarginContainer/VBoxContainer3/VBoxContainer/SearchLineEdit" to="." method="_on_search_line_edit_text_changed"]
+[connection signal="gui_input" from="MarginContainer/VBoxContainer3/VBoxContainer2/Tree" to="." method="_on_tree_gui_input"]

@@ -22,23 +22,12 @@ class AssetData :
 				return "";
 			return ascription.get_parent().get_metadata(0).path + "/" + ascription.get_text(0);
 
-
-
 func _ready() : 
 	tree.columns = 1;
 	var root = tree.create_item();
 	var data : AssetData = AssetData.new();
 	root.set_metadata(0, data);
 	# 创建根节点
-	
-	#var win = Window.new();
-	#win.size = Vector2i(640, 480);
-	#win.position = Vector2i(100, 100);
-	#get_tree().root.add_child.call_deferred(win);
-	#win.add_child(tree);
-	#tree.size = win.size;
-	
-
 
 func append_item_asset(item_name : String, ascription : TreeItem = null) : 
 	if (ascription == null) : 

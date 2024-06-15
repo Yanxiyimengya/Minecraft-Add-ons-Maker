@@ -68,7 +68,6 @@ func _exit_tree() :
 func _asset_tree_added_item(item : TreeItem) : 
 	if (item == null) : 
 		return;
-	var item_name : String = item.get_text(0);
 	var data : AssetManager.AssetData = item.get_metadata(0);
 	var path : String = data.path; 
 	if (data.ascription != null) : 
@@ -110,7 +109,6 @@ func set_porup_menu(state : PorupState) :
 
 func create_new_item(item_name : String, current_root : TreeItem) -> TreeItem : 
 	var asset : MinecraftItemAsset = MinecraftItemAsset.new();
-	
 	var parent_item : TreeItem = AssetManager.append_asset_to_tree_no_signal(item_name, asset, current_root.get_metadata(0));
 	if (parent_item == null) : return;
 	var item : TreeItem = append_asset_item(current_root, parent_item);

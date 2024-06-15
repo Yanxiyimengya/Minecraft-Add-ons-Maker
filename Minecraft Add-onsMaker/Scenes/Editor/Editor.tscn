@@ -37,7 +37,7 @@ func _ready() :
 		%EditorDockable.layout.hidden_tabs[\"FileSystem\"] = true;
 
 func _input(event : InputEvent) : 
-	if (event is InputEventWithModifiers) : 
+	if (event is InputEventKey) : 
 		if (event.get_modifiers_mask() == KEY_MASK_CTRL) : 
 			if (event.is_pressed() && event.keycode == KEY_S) : 
 				var proj_cfg : PackageConfig = ProjectManager.current_project_config;

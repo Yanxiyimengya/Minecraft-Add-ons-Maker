@@ -1,35 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://bgi3o02ghv0by"]
+[gd_scene load_steps=4 format=3 uid="uid://bgi3o02ghv0by"]
 
 [ext_resource type="Script" path="res://Scenes/Editor/AttributeEditor/Edit/ItemEdit/ItemEdit.gd" id="1_4lc85"]
+[ext_resource type="PackedScene" uid="uid://c8d8pr3jxwny8" path="res://Scenes/Editor/AttributeEditor/Edit/ItemEdit/AddComponent.tscn" id="2_q2rgo"]
 
-[sub_resource type="GDScript" id="GDScript_52dx8"]
-script/source = "extends PanelContainer;
+[sub_resource type="GDScript" id="GDScript_nhwtt"]
+script/source = "extends Window;
 
-signal change_texture(texture_resource : ResourceManager.ResourceData);
 
-var texture : Texture2D = null : 
-	set(value) : 
-		if (value != null) :
-			%ItemTextureRect.custom_minimum_size = Vector2(80, 80);
-		else : 
-			%ItemTextureRect.custom_minimum_size = Vector2.ZERO;
-		%ItemTextureRect.texture = value;
 
-func _can_drop_data(position : Vector2, data) : 
-	var rect : Rect2 = self.get_rect();
-	rect.position = Vector2.ZERO;
-	if (data is Array && data.size() > 1) : 
-		if (data[0] == \"FileDrag\") : 
-			return rect.has_point(position);
-	return false;
-
-func _drop_data(at_position: Vector2, data: Variant) : 
-	var drop_data : TreeItem = data[1].get_metadata(0);
-	var res_data : ResourceManager.ResourceData = drop_data.get_metadata(0);
-	if (res_data.data is MinecraftTextureResource) : 
-		texture = res_data.data.texture;
-		change_texture.emit(res_data);
-	# 拖拽数据
+func _on_close_requested() : 
+	self.hide();
 "
 
 [node name="ItemEdit" type="MarginContainer"]
@@ -75,155 +55,35 @@ layout_mode = 2
 size_flags_horizontal = 3
 context_menu_enabled = false
 
-[node name="TextureEdit" type="HBoxContainer" parent="VBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="VBoxContainer/TextureEdit"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "物品纹理"
-
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/TextureEdit"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 10
-
-[node name="ItemTextureContainer" type="PanelContainer" parent="VBoxContainer/TextureEdit/HBoxContainer"]
+[node name="ComponentsEditContainer" type="VBoxContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-script = SubResource("GDScript_52dx8")
 
-[node name="ItemTextureRect" type="TextureRect" parent="VBoxContainer/TextureEdit/HBoxContainer/ItemTextureContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 10
+
+[node name="AddComponentButton" type="Button" parent="VBoxContainer/MarginContainer"]
+layout_mode = 2
+text = "添加物品组件"
+
+[node name="AddComponentWindow" type="Window" parent="."]
 unique_name_in_owner = true
-texture_filter = 1
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-expand_mode = 5
-
-[node name="ResetItemTextureButton" type="Button" parent="VBoxContainer/TextureEdit/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "清空"
-
-[node name="ItemCategory" type="HBoxContainer" parent="VBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="VBoxContainer/ItemCategory"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "物品类别"
-
-[node name="CategoryOptionButton" type="OptionButton" parent="VBoxContainer/ItemCategory"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-item_count = 4
-popup/item_0/text = "建筑"
-popup/item_0/id = 0
-popup/item_1/text = "装备"
-popup/item_1/id = 1
-popup/item_2/text = "物品"
-popup/item_2/id = 2
-popup/item_3/text = "自然"
-popup/item_3/id = 3
-
-[node name="Foil" type="HBoxContainer" parent="VBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="VBoxContainer/Foil"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "显示附魔效果"
-
-[node name="FoilCheckBox" type="CheckBox" parent="VBoxContainer/Foil"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="StackedByData" type="VBoxContainer" parent="VBoxContainer"]
-layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/StackedByData"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="VBoxContainer/StackedByData/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "能否堆叠"
-
-[node name="StackedByDataCheckBox" type="CheckBox" parent="VBoxContainer/StackedByData/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="MaxStackSizeContainer" type="MarginContainer" parent="VBoxContainer/StackedByData"]
-unique_name_in_owner = true
+title = "添加组件"
+initial_position = 3
+size = Vector2i(720, 480)
+current_screen = 0
 visible = false
-layout_mode = 2
-theme_override_constants/margin_left = 30
+wrap_controls = true
+exclusive = true
+popup_window = true
+script = SubResource("GDScript_nhwtt")
 
-[node name="MaxStackSizeContainer" type="HBoxContainer" parent="VBoxContainer/StackedByData/MaxStackSizeContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="VBoxContainer/StackedByData/MaxStackSizeContainer/MaxStackSizeContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "最大堆叠数量"
-
-[node name="MaxStackSizeSpinBox" type="SpinBox" parent="VBoxContainer/StackedByData/MaxStackSizeContainer/MaxStackSizeContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-min_value = 1.0
-max_value = 64.0
-value = 1.0
-
-[node name="FoosAttribute" type="VBoxContainer" parent="VBoxContainer"]
-layout_mode = 2
-
-[node name="IsFood" type="HBoxContainer" parent="VBoxContainer/FoosAttribute"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="VBoxContainer/FoosAttribute/IsFood"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "作为食物"
-
-[node name="IsFoodCheckBox" type="CheckBox" parent="VBoxContainer/FoosAttribute/IsFood"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="FoodAttributesContainer" type="MarginContainer" parent="VBoxContainer/FoosAttribute"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-theme_override_constants/margin_left = 30
-
-[node name="FoodAttributesContainer" type="VBoxContainer" parent="VBoxContainer/FoosAttribute/FoodAttributesContainer"]
-layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/FoosAttribute/FoodAttributesContainer/FoodAttributesContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="VBoxContainer/FoosAttribute/FoodAttributesContainer/FoodAttributesContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "可以一直吃"
-
-[node name="CanAwaysEatCheckBox" type="CheckBox" parent="VBoxContainer/FoosAttribute/FoodAttributesContainer/FoodAttributesContainer/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
+[node name="AddComponent" parent="AddComponentWindow" instance=ExtResource("2_q2rgo")]
 
 [connection signal="text_changed" from="VBoxContainer/ItemID/ItemIDEdit" to="." method="_on_item_id_edit_text_changed"]
-[connection signal="change_texture" from="VBoxContainer/TextureEdit/HBoxContainer/ItemTextureContainer" to="." method="_on_panel_change_texture"]
-[connection signal="pressed" from="VBoxContainer/TextureEdit/HBoxContainer/ResetItemTextureButton" to="." method="_on_reset_item_texture_button_pressed"]
-[connection signal="item_selected" from="VBoxContainer/ItemCategory/CategoryOptionButton" to="." method="_on_category_option_button_item_selected"]
-[connection signal="toggled" from="VBoxContainer/Foil/FoilCheckBox" to="." method="_on_foil_check_box_toggled"]
-[connection signal="toggled" from="VBoxContainer/StackedByData/HBoxContainer/StackedByDataCheckBox" to="." method="_on_stacked_by_data_check_box_toggled"]
-[connection signal="value_changed" from="VBoxContainer/StackedByData/MaxStackSizeContainer/MaxStackSizeContainer/MaxStackSizeSpinBox" to="." method="_on_max_stack_size_spin_box_value_changed"]
-[connection signal="toggled" from="VBoxContainer/FoosAttribute/IsFood/IsFoodCheckBox" to="." method="_on_is_food_check_box_toggled"]
-[connection signal="toggled" from="VBoxContainer/FoosAttribute/FoodAttributesContainer/FoodAttributesContainer/HBoxContainer/CanAwaysEatCheckBox" to="." method="_on_can_aways_eat_check_box_toggled"]
+[connection signal="pressed" from="VBoxContainer/MarginContainer/AddComponentButton" to="." method="_on_add_component_button_pressed"]
+[connection signal="close_requested" from="AddComponentWindow" to="AddComponentWindow" method="_on_close_requested"]

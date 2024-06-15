@@ -18,7 +18,6 @@ func build(image : Image) -> ArrayMesh :
 	var pixel_array : Array[Vector3i] = [];
 	var color_array : Array[Color] = [];
 	var pixel_color : Color;
-	var img_pos : Vector2i;
 	
 	for img_x in image_size.x : 
 		for img_y in image_size.y : 
